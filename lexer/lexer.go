@@ -25,8 +25,10 @@ type Lexer struct {
 }
 
 // New returns a new, initialised lexer.
+// l.curLinePosition is set to -1 so that when one character is read, it will be set to 0.
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
+	l.curLinePosition = -1
 	l.readChar()
 
 	return l
@@ -66,24 +68,26 @@ func (l *Lexer) skipWhitespace() {
 // readIdentifier will reads a set of characters (including an underscore) and returns the string representation of that
 // set of characters.
 func (l *Lexer) readIdentifier() string {
-	l.startPosition = l.position
+	l.startPosition = l.curLinePosition
+	start := l.position
 
 	for isValidIdentCharacter(l.ch) {
 		l.readChar()
 	}
 
-	return l.input[l.startPosition:l.position]
+	return l.input[start:l.position]
 }
 
 // readNumber reads a set of digits and returns a number as a string.
 func (l *Lexer) readNumber() string {
-	l.startPosition = l.position
+	l.startPosition = l.curLinePosition
+	start := l.position
 
 	for isDigit(l.ch) {
 		l.readChar()
 	}
 
-	return l.input[l.startPosition:l.position]
+	return l.input[start:l.position]
 }
 
 // newSingleToken returns a new token from a token type.
@@ -111,14 +115,12 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newSingleToken(token.GT)
 	case ',':
 		tok = l.newSingleToken(token.COMMA)
-	case ';':
-		tok = l.newSingleToken(token.COMMA)
 	case '(':
 		tok = l.newSingleToken(token.LPAREN)
 	case ')':
 		tok = l.newSingleToken(token.RPAREN)
 	case '[':
-		tok = l.newSingleToken(token.RBRACKET)
+		tok = l.newSingleToken(token.LBRACKET)
 	case ']':
 		tok = l.newSingleToken(token.RBRACKET)
 	case '{':
@@ -187,8 +189,8 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
-		tok.Column = l.curLine
-		tok.Line = l.curLinePosition
+		tok.Column = l.curLinePosition
+		tok.Line = l.curLine
 
 	// Multiple character handling
 	default:
@@ -206,7 +208,7 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		}
 
-		return l.newSingleToken(token.ILLEGAL)
+		tok = l.newSingleToken(token.ILLEGAL)
 	}
 
 	l.readChar()
