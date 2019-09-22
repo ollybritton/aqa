@@ -17,8 +17,6 @@ This is a list of differences/ideal changes to the Monkey programming language, 
 This is a list of ideal things that would be useful to have in the language, that aren't defined in the specification.
 
 * Maps, using the { construct }
-* Subroutines being expressions (so they can be passed around as first class citizens)
+* ~~Subroutines being expressions (so they can be passed around as first class citizens)~~
+* Subroutines being implemented as they are in the spec, add a new FUNCTION construct which are like subroutines but expressions
 * NO UPPERCASE REQUIREMENTS SO THINGS DON'T NEED TO BE SCREAMED
-* Comments
-
-
