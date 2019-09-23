@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/ollybritton/aqa++/token"
 )
@@ -135,6 +136,52 @@ func (is *IfStatement) String() string {
 	}
 
 	out.WriteString("\nENDIF")
+
+	return out.String()
+}
+
+// Subroutine represents a subroutine inside the program. Subroutines are here for compliance with the spec, and are not
+// expressions like FUNC will be.
+// Example:
+//   SUBROUTINE
+//   show_add(a, b)
+//     result <- a + b
+//     OUTPUT result
+//   ENDSUBROUTINE
+// General:
+//   SUBROUTINE
+//   {ident}({ident}, {ident}...)
+//     {statements}
+//   ENDSUBROUTINE
+type Subroutine struct {
+	Tok        token.Token // the token.SUBROUTINE token
+	Name       *Identifier
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (s *Subroutine) statementNode()     {}
+func (s *Subroutine) Token() token.Token { return s.Tok }
+func (s *Subroutine) String() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range s.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString(s.Tok.Literal + "\n")
+	out.WriteString(s.Name.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ","))
+	out.WriteString(")")
+	out.WriteString("\n")
+
+	for _, s := range s.Body.Statements {
+		out.WriteString("  " + s.String() + "\n")
+	}
+
+	out.WriteString("ENDSUBROUTINE")
 
 	return out.String()
 }

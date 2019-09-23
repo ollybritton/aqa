@@ -118,10 +118,13 @@ func (p *Parser) parseVariableAssignment() *ast.VariableAssignment {
 		return nil
 	}
 
+	p.nextToken()
+
 	// TODO: Skipping expressions until we can parse them
-	for !p.curTokenIs(token.NEWLINE) && !p.curTokenIs(token.EOF) {
-		p.nextToken()
-	}
+	// for !p.curTokenIs(token.NEWLINE) && !p.curTokenIs(token.EOF) {
+	// 	p.nextToken()
+	// }
+	stmt.Value = p.parseExpression(LOWEST)
 
 	return stmt
 }
@@ -132,9 +135,10 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	p.nextToken()
 
 	// TODO: Skipping expressions until we can parse them
-	for !p.curTokenIs(token.NEWLINE) && !p.curTokenIs(token.EOF) {
-		p.nextToken()
-	}
+	// for !p.curTokenIs(token.NEWLINE) && !p.curTokenIs(token.EOF) {
+	// 	p.nextToken()
+	// }
+	stmt.ReturnValue = p.parseExpression(LOWEST)
 
 	return stmt
 }
