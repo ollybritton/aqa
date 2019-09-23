@@ -91,6 +91,60 @@ func TestIfStatement(t *testing.T) {
 	}
 }
 
+func TestSubroutineStatement(t *testing.T) {
+	input := `SUBROUTINE add(a, b) 1+1 ENDSUBROUTINE`
+
+	_, program := parseProgram(t, input)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d", 1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.Subroutine)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.Subroutine. got=%T", program.Statements[0])
+	}
+
+	if len(stmt.Body.Statements) != 1 {
+		t.Fatalf("subroutine body does not contain %d. got=%d", 1, len(stmt.Body.Statements))
+	}
+
+	expr, ok := stmt.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("subroutine body is not ast.ExpressionStatement. got=%T", stmt.Body.Statements[0])
+	}
+
+	if !testInfixExpression(t, expr.Expression, 1, "+", 1) {
+		return
+	}
+
+}
+
+func TestSubroutineParameterParsing(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedParams []string
+	}{
+		{"SUBROUTINE add() ENDSUBROUTINE", []string{}},
+		{"SUBROUTINE add(a) ENDSUBROUTINE", []string{"a"}},
+		{"SUBROUTINE add(a, b) ENDSUBROUTINE", []string{"a", "b"}},
+	}
+
+	for _, tt := range tests {
+		_, program := parseProgram(t, tt.input)
+
+		sub := program.Statements[0].(*ast.Subroutine)
+
+		if len(sub.Parameters) != len(tt.expectedParams) {
+			t.Errorf("length of parameters wrong. want=%d, got=%d", len(tt.expectedParams), len(sub.Parameters))
+		}
+
+		for i, ident := range tt.expectedParams {
+			testLiteralExpression(t, sub.Parameters[i], ident)
+		}
+	}
+}
+
 // Oh god. I suggest you minimise this one
 func TestIfElseElseIfStatement(t *testing.T) {
 	input := `IF 1 == 1 THEN

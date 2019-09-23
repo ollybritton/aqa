@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/ollybritton/aqa++/token"
 )
@@ -92,6 +93,31 @@ func (ie *InfixExpression) String() string {
 	out.WriteString(" " + ie.Operator + " ")
 	out.WriteString(ie.Right.String())
 	out.WriteString(")")
+
+	return out.String()
+}
+
+// SubroutineCall represents a call to a subroutine within the AST.
+// Example: `add(1,2)`
+// General: `{IDENT}({expression}, {expression}...)`
+type SubroutineCall struct {
+	Tok        token.Token // The '(' token
+	Subroutine *Identifier
+	Arguments  []Expression
+}
+
+func (sc *SubroutineCall) expressionNode()    {}
+func (sc *SubroutineCall) Token() token.Token { return sc.Tok }
+func (sc *SubroutineCall) String() string {
+	var out bytes.Buffer
+
+	args := []string{}
+	for _, a := range sc.Arguments {
+		args = append(args, a.String())
+	}
+
+	out.WriteString(sc.Subroutine.Value)
+	out.WriteString("(" + strings.Join(args, ", ") + ")")
 
 	return out.String()
 }

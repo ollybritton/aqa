@@ -64,7 +64,7 @@ This tool can then be used to view the tree as text or as a graph using Graphviz
 func checkErrors(p *parser.Parser) {
 	for _, e := range p.Errors() {
 		errorType := au.Red(au.Bold(fmt.Sprintf("%T", e)))
-		fmt.Printf("%v: %v", errorType, au.Green(e.Error()))
+		fmt.Printf("%v: %v\n", errorType, au.Green(e.Error()))
 	}
 
 	fmt.Println("")

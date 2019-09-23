@@ -92,11 +92,13 @@ var Keywords = map[string]Type{
 	"true":  TRUE,
 	"false": FALSE,
 
-	"if":   IF,
-	"else": ELSE,
+	"if":         IF,
+	"else":       ELSE,
+	"subroutine": SUBROUTINE,
 
-	"then":  BLOCK_START, // IF <CONDITION> THEN ... ENDIF
-	"endif": BLOCK_END,
+	"then":          BLOCK_START, // IF <CONDITION> THEN ... ENDIF
+	"endif":         BLOCK_END,
+	"endsubroutine": BLOCK_END,
 }
 
 // LookupKeyword converts a keyword name into a keyword.

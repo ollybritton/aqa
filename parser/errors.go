@@ -101,7 +101,7 @@ func (e NoPrefixParseFnError) Error() string {
 
 // NewNoPrefixParseFnError returns a new NoPrefixParseFnError
 func NewNoPrefixParseFnError(curTok, peekTok token.Token, unknown token.Type) NoPrefixParseFnError {
-	msg := fmt.Sprintf("no prefix parse function for %s found", unknown)
+	msg := fmt.Sprintf("no prefix parse function for '%s' found", unknown)
 
 	return NoPrefixParseFnError{
 		Message: msg,

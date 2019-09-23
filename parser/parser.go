@@ -53,6 +53,8 @@ func New(l *lexer.Lexer) *Parser {
 		token.NOT_EQ:   p.parseInfixExpression,
 		token.LT:       p.parseInfixExpression,
 		token.GT:       p.parseInfixExpression,
+
+		token.LPAREN: p.parseCallExpression,
 	}
 
 	p.nextToken()
@@ -93,6 +95,10 @@ func (p *Parser) nextToken() {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
+	for p.curTokenIs(token.NEWLINE) {
+		p.nextToken()
+	}
+
 	switch {
 	case p.curToken.Type == token.IDENT && p.peekTokenIs(token.ASSIGN):
 		return p.parseVariableAssignment()
@@ -100,6 +106,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case p.curToken.Type == token.IF:
 		return p.parseIfStatement()
+	case p.curToken.Type == token.SUBROUTINE:
+		return p.parseSubroutineDefinition()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -221,6 +229,58 @@ func (p *Parser) parseElseIfStatement() *ast.IfStatement {
 
 }
 
+func (p *Parser) parseSubroutineDefinition() *ast.Subroutine {
+	sub := &ast.Subroutine{Tok: p.curToken}
+	p.nextToken()
+
+	for p.curTokenIs(token.NEWLINE) {
+		p.nextToken()
+	}
+
+	sub.Name = p.parseIdentifier().(*ast.Identifier)
+	if !p.expectPeek(token.LPAREN) {
+		p.addError(
+			NewUnexpectedTokenError(p.curToken, p.peekToken, token.LPAREN),
+		)
+
+		return nil
+	}
+
+	sub.Parameters = p.parseParameters()
+	sub.Body = p.parseBlockStatement([]token.Type{token.BLOCK_END})
+
+	p.nextToken()
+
+	return sub
+}
+
+func (p *Parser) parseParameters() []*ast.Identifier {
+	identifiers := []*ast.Identifier{}
+
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+		return identifiers
+	}
+
+	p.nextToken()
+	ident := &ast.Identifier{Tok: p.curToken, Value: p.curToken.Literal}
+	identifiers = append(identifiers, ident)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+
+		ident := &ast.Identifier{Tok: p.curToken, Value: p.curToken.Literal}
+		identifiers = append(identifiers, ident)
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return identifiers
+}
+
 func (p *Parser) parseBlockStatement(until []token.Type) *ast.BlockStatement {
 	block := &ast.BlockStatement{Tok: p.curToken}
 
@@ -305,6 +365,49 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 func (p *Parser) parseBooleanLiteral() ast.Expression {
 	return &ast.BooleanLiteral{Tok: p.curToken, Value: p.curTokenIs(token.TRUE)}
+}
+
+func (p *Parser) parseCallExpression(left ast.Expression) ast.Expression {
+	switch t := left.(type) {
+	case *ast.Identifier:
+		return p.parseSubroutineCall(t)
+	default:
+		// TODO: add support for function expressions
+		p.addError(
+			NewInvalidTokenError(left.Token(), p.curToken, left.Token()),
+		)
+		return nil
+	}
+}
+
+func (p *Parser) parseSubroutineCall(ident *ast.Identifier) ast.Expression {
+	exp := &ast.SubroutineCall{Tok: p.curToken, Subroutine: ident}
+	exp.Arguments = p.parseCallArguments()
+	return exp
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	args := []ast.Expression{}
+
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+		return args
+	}
+
+	p.nextToken()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return args
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
