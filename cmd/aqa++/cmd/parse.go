@@ -61,13 +61,17 @@ This tool can then be used to view the tree as text or as a graph using Graphviz
 	},
 }
 
-func checkErrors(p *parser.Parser) {
+func checkErrors(p *parser.Parser) bool {
+	var did bool
+
 	for _, e := range p.Errors() {
+		did = true
 		errorType := au.Red(au.Bold(fmt.Sprintf("%T", e)))
 		fmt.Printf("%v: %v\n", errorType, au.Green(e.Error()))
 	}
 
 	fmt.Println("")
+	return did
 }
 
 func parse(input string, source, graph bool) {
