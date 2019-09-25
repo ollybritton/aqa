@@ -21,6 +21,10 @@ func Eval(node ast.Node) object.Object {
 	case *ast.IfStatement:
 		return evalIfStatement(node)
 
+	case *ast.ReturnStatement:
+		val := Eval(node.ReturnValue)
+		return &object.ReturnValue{Value: val}
+
 	// Literals
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}

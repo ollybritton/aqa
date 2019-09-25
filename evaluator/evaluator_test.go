@@ -31,7 +31,7 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
@@ -65,7 +65,7 @@ func TestEvalBooleanExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
@@ -82,7 +82,7 @@ func TestBangOperator(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
@@ -100,11 +100,34 @@ func TestIfElseStatements(t *testing.T) {
 		{"IF 1 > 2 THEN 10 ELSE 20 ENDIF", 20},
 		{"IF 1 < 2 THEN 10 ELSE 20 ENDIF", 10},
 		{"IF 1 == 0 THEN 1 ELSE IF 1 == 2 THEN 2 ELSE 3 ENDIF", 3},
-		{" IF 1 == 0 THEN 1 ELSE IF 1 == 2 THEN 2 ELSE IF 1 == 1 THEN 4 ELSE 3 ENDIF", 4},
+		{"IF 1 == 0 THEN 1 ELSE IF 1 == 2 THEN 2 ELSE IF 1 == 1 THEN 4 ELSE 3 ENDIF", 4},
+		{`IF false THEN 10 ELSE
+		20
+		ENDIF`, 20},
+		{`IF false THEN 10 ELSE
+			IF true THEN
+				20
+			ENDIF
+		ENDIF`, 20},
+		{`IF false THEN 10 ELSE
+			IF false THEN
+				20
+			ELSE
+				30
+			ENDIF
+		ENDIF`, 30},
+		{`IF false THEN 10 ELSE
+			IF true THEN
+				20
+			ELSE
+				30
+			ENDIF
+		ENDIF`, 20},
+		{`IF false THEN 10 ELSE IF 1 == 0 THEN IF 1 == 1 THEN 12 ENDIF ELSE 100 ENDIF`, 100},
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		integer, ok := tt.expected.(int)
 		if ok {
 			testIntegerObject(t, evaluated, int64(integer))
@@ -114,11 +137,57 @@ func TestIfElseStatements(t *testing.T) {
 	}
 }
 
+func TestReturnStatements(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"return 10", 10},
+		{`return 10
+		9`, 10},
+		{`return 2*5
+		 9`, 10},
+		{`9
+		return 10
+		9`, 10},
+		{
+			`IF 10 > 1 THEN
+				IF 10 > 1 THEN
+					return 10
+				ENDIF
+
+				return 1
+			ENDIF`,
+			10,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if returnVal, ok := evaluated.(*object.ReturnValue); ok {
+			testIntegerObject(t, returnVal.Value, tt.expected)
+		}
+	}
+
+}
+
 // private testing methods/functions
-func testEval(input string) object.Object {
+func testEval(t *testing.T, input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.Parse()
+
+	if len(p.Errors()) != 0 {
+		t.Errorf("parser errors:")
+		t.Errorf(input)
+
+		for _, e := range p.Errors() {
+			t.Errorf("%T occured while parsing: %v", e, e)
+		}
+
+		t.FailNow()
+	}
 
 	return Eval(program)
 }

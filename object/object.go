@@ -41,3 +41,11 @@ type Null struct{}
 
 func (n *Null) Object() Type    { return NULL_OBJ }
 func (n *Null) Inspect() string { return "null" }
+
+// ReturnValue represents a value that is being returned from a subroutine or from a program as a whole.
+type ReturnValue struct {
+	Value Object
+}
+
+func (rv *ReturnValue) Object() Type    { return RETURN_OBJ }
+func (rv *ReturnValue) Inspect() string { return rv.Value.Inspect() }

@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/ollybritton/aqa++/ast"
@@ -128,10 +127,6 @@ func (p *Parser) parseVariableAssignment() *ast.VariableAssignment {
 
 	p.nextToken()
 
-	// TODO: Skipping expressions until we can parse them
-	// for !p.curTokenIs(token.NEWLINE) && !p.curTokenIs(token.EOF) {
-	// 	p.nextToken()
-	// }
 	stmt.Value = p.parseExpression(LOWEST)
 
 	return stmt
@@ -142,10 +137,6 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
-	// TODO: Skipping expressions until we can parse them
-	// for !p.curTokenIs(token.NEWLINE) && !p.curTokenIs(token.EOF) {
-	// 	p.nextToken()
-	// }
 	stmt.ReturnValue = p.parseExpression(LOWEST)
 
 	return stmt
@@ -196,7 +187,6 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 }
 
 func (p *Parser) parseElseIfStatement() *ast.IfStatement {
-
 	stmt := &ast.IfStatement{Tok: p.curToken}
 
 	// Skip token.ELSE and token.IF
@@ -214,14 +204,12 @@ func (p *Parser) parseElseIfStatement() *ast.IfStatement {
 
 	switch {
 	case p.curTokenIs(token.ELSE) && p.peekTokenIs(token.IF):
-
 		stmt.ElseIf = p.parseElseIfStatement()
 
 	case p.curTokenIs(token.BLOCK_END) || p.curTokenIs(token.ELSE):
 		return stmt
 
 	default:
-
 		return nil
 	}
 
@@ -286,14 +274,14 @@ func (p *Parser) parseBlockStatement(until []token.Type) *ast.BlockStatement {
 
 	p.nextToken()
 	for !p.curTokenIs(token.EOF) {
+		if p.curTokenIs(token.NEWLINE) {
+			p.nextToken()
+		}
+
 		for _, stopToken := range until {
 			if p.curTokenIs(stopToken) {
 				return block
 			}
-		}
-
-		if p.curTokenIs(token.NEWLINE) {
-			p.nextToken()
 		}
 
 		stmt := p.parseStatement()
@@ -333,7 +321,6 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	for !(p.peekTokenIs(token.NEWLINE) || p.peekTokenIs(token.EOF)) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
 		if infix == nil {
-			fmt.Println("sup beach")
 			return leftExp
 		}
 
