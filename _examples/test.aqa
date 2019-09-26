@@ -1,0 +1,11 @@
+a <- 100
+
+SUBROUTINE add_twenty(x)
+    SUBROUTINE add_ten(y)
+        return y + 10
+    ENDSUBROUTINE
+
+    return add_ten(add_ten(x))
+ENDSUBROUTINE
+
+add_twenty(a)

@@ -1,7 +1,9 @@
 package evaluator
 
 import (
-	"github.com/ollybritton/monkey/object"
+	"fmt"
+
+	"github.com/ollybritton/aqa++/object"
 )
 
 // Reused objects as to prevent allocations
@@ -31,4 +33,16 @@ func isTruthy(obj object.Object) bool {
 	default:
 		return true
 	}
+}
+
+func newError(message string, args ...interface{}) *object.Error {
+	return &object.Error{Message: fmt.Sprintf(message, args...)}
+}
+
+func isError(obj object.Object) bool {
+	if obj != nil {
+		return obj.Type() == object.ERROR_OBJ
+	}
+
+	return false
 }

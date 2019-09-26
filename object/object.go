@@ -1,17 +1,25 @@
 package object
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"strings"
+
+	"github.com/ollybritton/aqa++/ast"
+)
 
 // Type represents a type of object, such as an integer or a subroutine.
 type Type string
 
 // Definition of object types.
 const (
-	INTEGER_OBJ = "INTEGER"
-	BOOLEAN_OBJ = "BOOLEAN"
+	INTEGER_OBJ  = "INTEGER"
+	BOOLEAN_OBJ  = "BOOLEAN"
+	FUNCTION_OBJ = "FUNCTION"
 
-	RETURN_OBJ = "RETURN_VALUE"
-	NULL_OBJ   = "NULL"
+	RETURN_VALUE_OBJ = "RETURN_VALUE"
+	ERROR_OBJ        = "ERROR"
+	NULL_OBJ         = "NULL"
 )
 
 // Object is an interface which allows different objects to be represented.
@@ -25,7 +33,7 @@ type Integer struct {
 	Value int64
 }
 
-func (i *Integer) Object() Type    { return INTEGER_OBJ }
+func (i *Integer) Type() Type      { return INTEGER_OBJ }
 func (i *Integer) Inspect() string { return fmt.Sprintf("%d", i.Value) }
 
 // Boolean represents a boolean value, such as true or false, within the program.
@@ -33,13 +41,13 @@ type Boolean struct {
 	Value bool
 }
 
-func (b *Boolean) Object() Type    { return BOOLEAN_OBJ }
+func (b *Boolean) Type() Type      { return BOOLEAN_OBJ }
 func (b *Boolean) Inspect() string { return fmt.Sprintf("%t", b.Value) }
 
 // Null represents the lack/absence of a value. It is like nil.
 type Null struct{}
 
-func (n *Null) Object() Type    { return NULL_OBJ }
+func (n *Null) Type() Type      { return NULL_OBJ }
 func (n *Null) Inspect() string { return "null" }
 
 // ReturnValue represents a value that is being returned from a subroutine or from a program as a whole.
@@ -47,5 +55,46 @@ type ReturnValue struct {
 	Value Object
 }
 
-func (rv *ReturnValue) Object() Type    { return RETURN_OBJ }
+func (rv *ReturnValue) Type() Type      { return RETURN_VALUE_OBJ }
 func (rv *ReturnValue) Inspect() string { return rv.Value.Inspect() }
+
+// Error represents an error that occurs during the evalutation of the programming language.
+type Error struct {
+	Message string
+}
+
+func (e *Error) Type() Type      { return ERROR_OBJ }
+func (e *Error) Inspect() string { return "ERROR: " + e.Message }
+
+// Subroutine represents a subroutine within the evaluator.
+type Subroutine struct {
+	Name       *ast.Identifier
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (s *Subroutine) Type() Type { return FUNCTION_OBJ }
+func (s *Subroutine) Inspect() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range s.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("SUBROUTINE\n")
+	out.WriteString(s.Name.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(")\n")
+
+	for _, stmt := range s.Body.Statements {
+		out.WriteString("  " + stmt.String())
+	}
+	out.WriteString("\n")
+
+	out.WriteString("ENDSUBROUTINE")
+
+	return out.String()
+}

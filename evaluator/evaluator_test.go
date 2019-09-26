@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/ollybritton/aqa++/lexer"
+	"github.com/ollybritton/aqa++/object"
 	"github.com/ollybritton/aqa++/parser"
-	"github.com/ollybritton/monkey/object"
 )
 
 func TestEvalIntegerExpression(t *testing.T) {
@@ -172,6 +172,118 @@ func TestReturnStatements(t *testing.T) {
 
 }
 
+func TestErrorHandling(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{
+			`5 + true`,
+			"type mismatch: INTEGER + BOOLEAN",
+		},
+		{
+			`5 + true
+			5`,
+			"type mismatch: INTEGER + BOOLEAN",
+		},
+		{
+			"-true",
+			"unknown operator: -BOOLEAN",
+		},
+		{
+			"true + false",
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			`5
+			true + false
+			5`,
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			"if 10 > 1 then true + false endif",
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			`
+IF 10 > 1 THEN
+	IF 10 > 1 THEN
+		RETURN true + false
+	ENDIF
+	RETURN 1
+ENDIF`,
+			"unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			`foobar`,
+			"identifier not found: foobar",
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("no error object returned. got=%T(%+v)", evaluated, evaluated)
+			continue
+		}
+
+		if errObj.Message != tt.expectedMessage {
+			t.Errorf("wrong error message. expected=%q, got=%q", tt.expectedMessage, errObj.Message)
+		}
+	}
+}
+
+func TestVariableAssignment(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"a <- 5\na", 5},
+		{"a <- 5*5\na", 25},
+		{"a <- 5\nb <- a\nb", 5},
+		{"a <- 5\nb <- a\nc <- a+b+5\nc", 15},
+	}
+
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(t, tt.input), tt.expected)
+	}
+}
+
+func TestSubroutines(t *testing.T) {
+	add := `SUBROUTINE add(x,y)
+return x+y
+ENDSUBROUTINE
+`
+
+	identity := `SUBROUTINE identity(x)
+return x
+ENDSUBROUTINE
+`
+
+	double := `SUBROUTINE double(x)
+return x*2
+ENDSUBROUTINE
+`
+
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{identity + "identity(5)", 5},
+		{double + "double(5)", 10},
+		{add + "add(1,2)", 3},
+		{add + "add(-1, 5*4)", 19},
+		{add + "add(add(1,2),add(5,3))", 11},
+		{add + "add(5+5, add(5,5))", 20},
+	}
+
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(t, tt.input), tt.expected)
+	}
+}
+
 // private testing methods/functions
 func testEval(t *testing.T, input string) object.Object {
 	l := lexer.New(input)
@@ -189,7 +301,7 @@ func testEval(t *testing.T, input string) object.Object {
 		t.FailNow()
 	}
 
-	return Eval(program)
+	return Eval(program, object.NewEnvironment())
 }
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {

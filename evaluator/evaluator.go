@@ -2,28 +2,66 @@ package evaluator
 
 import (
 	"github.com/ollybritton/aqa++/ast"
-	"github.com/ollybritton/monkey/object"
+	"github.com/ollybritton/aqa++/object"
 )
 
 // Eval evaluates a node, and returns its representation as an object.Object.
-func Eval(node ast.Node) object.Object {
+func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
-		return evalStatements(node.Statements)
+		return evalProgram(node, env)
 
 	// Statements
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression)
+		return Eval(node.Expression, env)
 
 	case *ast.BlockStatement:
-		return evalStatements(node.Statements)
+		return evalBlockStatement(node, env)
 
 	case *ast.IfStatement:
-		return evalIfStatement(node)
+		return evalIfStatement(node, env)
 
 	case *ast.ReturnStatement:
-		val := Eval(node.ReturnValue)
+		val := Eval(node.ReturnValue, env)
+		if isError(val) {
+			return val
+		}
+
 		return &object.ReturnValue{Value: val}
+
+	case *ast.VariableAssignment:
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+
+		env.Set(node.Name.Value, val)
+
+	case *ast.Subroutine:
+		params := node.Parameters
+		body := node.Body
+		name := node.Name
+
+		env.Set(name.Value, &object.Subroutine{Parameters: params, Env: env, Body: body, Name: name})
+
+	case *ast.SubroutineCall:
+		name := node.Subroutine.Value
+		args := evalExpressions(node.Arguments, env)
+		if len(args) == 1 && isError(args[0]) {
+			return args[0]
+		}
+
+		maybeSub, ok := env.Get(name)
+		if !ok {
+			return newError("unknown identifier: " + name)
+		}
+
+		sub, ok := maybeSub.(*object.Subroutine)
+		if !ok {
+			return newError("not a subroutine: " + maybeSub.Inspect())
+		}
+
+		return applySubroutine(sub, args)
 
 	// Literals
 	case *ast.IntegerLiteral:
@@ -33,23 +71,77 @@ func Eval(node ast.Node) object.Object {
 
 	// Expressions
 	case *ast.PrefixExpression:
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
 		return evalPrefixExpression(node.Operator, right)
 
 	case *ast.InfixExpression:
-		left := Eval(node.Left)
-		right := Eval(node.Right)
+		left := Eval(node.Left, env)
+		right := Eval(node.Right, env)
+
+		if isError(left) {
+			return left
+		} else if isError(right) {
+			return right
+		}
+
 		return evalInfixExpression(left, node.Operator, right)
+
+	case *ast.Identifier:
+		return evalIdentifier(node, env)
 	}
 
 	return nil
 }
 
-func evalStatements(stmts []ast.Statement) object.Object {
+func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	var result object.Object
 
-	for _, statement := range stmts {
-		result = Eval(statement)
+	for _, statement := range program.Statements {
+		result = Eval(statement, env)
+
+		switch result := result.(type) {
+		case *object.ReturnValue:
+			return result.Value
+		case *object.Error:
+			return result
+		}
+	}
+
+	return result
+}
+
+func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
+	var result object.Object
+
+	for _, statement := range block.Statements {
+		result = Eval(statement, env)
+
+		if result != nil {
+			rt := result.Type()
+
+			if rt == object.ERROR_OBJ || rt == object.RETURN_VALUE_OBJ {
+				return result
+			}
+		}
+	}
+
+	return result
+}
+
+func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Object {
+	var result []object.Object
+
+	for _, e := range exps {
+		evaluated := Eval(e, env)
+		if isError(evaluated) {
+			return []object.Object{evaluated}
+		}
+
+		result = append(result, evaluated)
 	}
 
 	return result
@@ -62,7 +154,7 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 	case "-":
 		return evalMinusPrefixOperatorExpression(right)
 	default:
-		return NULL
+		return newError("unknown operator: %s%s", operator, right.Type())
 	}
 }
 
@@ -83,8 +175,7 @@ func evalBangOperatorExpression(right object.Object) object.Object {
 
 func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	if right.Type() != object.INTEGER_OBJ {
-		// TODO: I want to avoid null, should error here
-		return NULL
+		return newError("unknown operator: -%s", right.Type())
 	}
 
 	value := right.(*object.Integer).Value
@@ -97,8 +188,11 @@ func evalInfixExpression(left object.Object, operator string, right object.Objec
 		return evalIntegerInfixExpression(left, operator, right)
 	case left.Type() == object.BOOLEAN_OBJ && right.Type() == object.BOOLEAN_OBJ:
 		return evalBooleanInfixExpression(left, operator, right)
+
+	case left.Type() != right.Type():
+		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 	default:
-		return NULL
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -126,8 +220,7 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 		return nativeBoolToBooleanObject(leftVal < rightVal)
 
 	default:
-		// TODO: I want to avoid null, should error here
-		return NULL
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -142,19 +235,25 @@ func evalBooleanInfixExpression(left object.Object, operator string, right objec
 		return nativeBoolToBooleanObject(leftVal != rightVal)
 
 	default:
-		// TODO: I want to avoid null, should error here
-		return NULL
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
-func evalIfStatement(node *ast.IfStatement) object.Object {
-	condition := Eval(node.Condition)
+func evalIfStatement(node *ast.IfStatement, env *object.Environment) object.Object {
+	condition := Eval(node.Condition, env)
+	if isError(condition) {
+		return condition
+	}
+
 	if isTruthy(condition) {
-		return Eval(node.Consequence)
+		return Eval(node.Consequence, env)
 	}
 
 	if node.ElseIf != nil {
-		elseIf := evalIfStatement(node.ElseIf)
+		elseIf := evalIfStatement(node.ElseIf, env)
+		if isError(elseIf) {
+			return elseIf
+		}
 
 		if elseIf != NULL {
 			return elseIf
@@ -162,8 +261,41 @@ func evalIfStatement(node *ast.IfStatement) object.Object {
 	}
 
 	if node.Else != nil {
-		return Eval(node.Else)
+		return Eval(node.Else, env)
 	}
 
 	return NULL
+}
+
+func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
+	val, ok := env.Get(node.Value)
+	if !ok {
+		return newError("identifier not found: " + node.Value)
+	}
+
+	return val
+}
+
+func applySubroutine(sub *object.Subroutine, args []object.Object) object.Object {
+	extended := extendSubroutineEnv(sub, args)
+	evaluated := Eval(sub.Body, extended)
+	return unwrapReturnValue(evaluated)
+}
+
+func extendSubroutineEnv(sub *object.Subroutine, args []object.Object) *object.Environment {
+	env := object.NewEnclosedEnvironment(sub.Env)
+
+	for paramIDx, param := range sub.Parameters {
+		env.Set(param.Value, args[paramIDx])
+	}
+
+	return env
+}
+
+func unwrapReturnValue(obj object.Object) object.Object {
+	if returnValue, ok := obj.(*object.ReturnValue); ok {
+		return returnValue.Value
+	}
+
+	return obj
 }

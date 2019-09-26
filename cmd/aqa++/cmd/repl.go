@@ -3,11 +3,13 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/chzyer/readline"
 	au "github.com/logrusorgru/aurora"
 	"github.com/ollybritton/aqa++/evaluator"
 	"github.com/ollybritton/aqa++/lexer"
+	"github.com/ollybritton/aqa++/object"
 	"github.com/ollybritton/aqa++/parser"
 	"github.com/spf13/cobra"
 )
@@ -36,6 +38,9 @@ var replCmd = &cobra.Command{
 		}
 		defer l.Close()
 
+		env := object.NewEnvironment()
+		var buffer string
+
 		for {
 			line, err := l.Readline()
 			if err == readline.ErrInterrupt {
@@ -48,12 +53,20 @@ var replCmd = &cobra.Command{
 				break
 			}
 
-			eval(line)
+			if strings.HasSuffix(line, "\\") {
+				buffer += line[:len(line)-1] + "\n"
+			} else if buffer != "" {
+				buffer += line
+				eval(buffer, env)
+				buffer = ""
+			} else {
+				eval(line, env)
+			}
 		}
 	},
 }
 
-func eval(input string) {
+func eval(input string, env *object.Environment) {
 	l := lexer.New(input)
 	p := parser.New(l)
 
@@ -62,7 +75,7 @@ func eval(input string) {
 		return
 	}
 
-	evaluated := evaluator.Eval(program)
+	evaluated := evaluator.Eval(program, env)
 	if evaluated != nil {
 		fmt.Println(
 			au.Green(evaluated.Inspect()),
