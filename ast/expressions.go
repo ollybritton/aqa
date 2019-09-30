@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ollybritton/aqa++/token"
+	"github.com/ollybritton/aqa/token"
 )
 
 // Identifier represents an identifier in the AST. Idents are expressions because they produce values (the value they represent)
@@ -118,6 +118,26 @@ func (sc *SubroutineCall) String() string {
 
 	out.WriteString(sc.Subroutine.Value)
 	out.WriteString("(" + strings.Join(args, ", ") + ")")
+
+	return out.String()
+}
+
+// StringLiteral represents a string inside the program.
+// Example: `"hello"`, `'Dave\'s mom was sad'`
+// General: `{'|"}{characters}{'|"}`
+type StringLiteral struct {
+	Tok   token.Token // The token.STRING token.
+	Value string
+}
+
+func (sl *StringLiteral) expressionNode()    {}
+func (sl *StringLiteral) Token() token.Token { return sl.Tok }
+func (sl *StringLiteral) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("\"")
+	out.WriteString(sl.Value)
+	out.WriteString("\"")
 
 	return out.String()
 }

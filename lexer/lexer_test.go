@@ -3,7 +3,7 @@ package lexer
 import (
 	"testing"
 
-	"github.com/ollybritton/aqa++/token"
+	"github.com/ollybritton/aqa/token"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +13,13 @@ ten <- 10
 !+-*/5
 != == = @
 5 < 10 > 5
-({[1, potato, 3]})`
+({[1, potato, 3]})
+"foobar"
+"foo bar"
+'foobar'
+'foo bar'
+'foo\'s bar'
+"foo\"s bar"`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -53,7 +59,19 @@ ten <- 10
 		{Type: token.RBRACKET, Literal: "]", Line: 5, Column: 15},
 		{Type: token.RBRACE, Literal: "}", Line: 5, Column: 16},
 		{Type: token.RPAREN, Literal: ")", Line: 5, Column: 17},
-		{Type: token.EOF, Literal: "", Line: 5, Column: 17},
+		{Type: token.NEWLINE, Literal: "\n", Line: 5, Column: 18},
+		{Type: token.STRING, Literal: "foobar", Line: 6, Column: 0},
+		{Type: token.NEWLINE, Literal: "\n", Line: 6, Column: 8},
+		{Type: token.STRING, Literal: "foo bar", Line: 7, Column: 0},
+		{Type: token.NEWLINE, Literal: "\n", Line: 7, Column: 9},
+		{Type: token.STRING, Literal: "foobar", Line: 8, Column: 0},
+		{Type: token.NEWLINE, Literal: "\n", Line: 8, Column: 8},
+		{Type: token.STRING, Literal: "foo bar", Line: 9, Column: 0},
+		{Type: token.NEWLINE, Literal: "\n", Line: 9, Column: 9},
+		{Type: token.STRING, Literal: "foo's bar", Line: 10, Column: 0},
+		{Type: token.NEWLINE, Literal: "\n", Line: 10, Column: 12},
+		{Type: token.STRING, Literal: "foo\"s bar", Line: 11, Column: 0},
+		{Type: token.EOF, Literal: "", Line: 11, Column: 11},
 	}
 
 	l := New(input)

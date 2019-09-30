@@ -3,7 +3,7 @@ package evaluator
 import (
 	"fmt"
 
-	"github.com/ollybritton/aqa++/object"
+	"github.com/ollybritton/aqa/object"
 )
 
 // Reused objects as to prevent allocations

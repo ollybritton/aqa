@@ -5,8 +5,8 @@ import (
 	"io"
 
 	"github.com/chzyer/readline"
-	"github.com/ollybritton/aqa++/lexer"
-	"github.com/ollybritton/aqa++/token"
+	"github.com/ollybritton/aqa/lexer"
+	"github.com/ollybritton/aqa/token"
 
 	au "github.com/logrusorgru/aurora"
 	"github.com/spf13/cobra"

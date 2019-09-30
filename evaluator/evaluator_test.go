@@ -3,9 +3,9 @@ package evaluator
 import (
 	"testing"
 
-	"github.com/ollybritton/aqa++/lexer"
-	"github.com/ollybritton/aqa++/object"
-	"github.com/ollybritton/aqa++/parser"
+	"github.com/ollybritton/aqa/lexer"
+	"github.com/ollybritton/aqa/object"
+	"github.com/ollybritton/aqa/parser"
 )
 
 func TestEvalIntegerExpression(t *testing.T) {
@@ -218,6 +218,10 @@ ENDIF`,
 			`foobar`,
 			"identifier not found: foobar",
 		},
+		{
+			`"Hello" - "World"`,
+			"unknown operator: STRING - STRING",
+		},
 	}
 
 	for _, tt := range tests {
@@ -281,6 +285,79 @@ ENDSUBROUTINE
 
 	for _, tt := range tests {
 		testIntegerObject(t, testEval(t, tt.input), tt.expected)
+	}
+}
+
+func TestStringLiteral(t *testing.T) {
+	input := `"Hello World!"`
+
+	evaluated := testEval(t, input)
+	str, ok := evaluated.(*object.String)
+
+	if !ok {
+		t.Fatalf("object is not a String. got=%T", evaluated)
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
+func TestStringConcatenation(t *testing.T) {
+	input := `"Hello" + " " + "World!"`
+
+	evaluated := testEval(t, input)
+	str, ok := evaluated.(*object.String)
+
+	if !ok {
+		t.Fatalf("object is not a String. got=%T", evaluated)
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
+func TestBuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`LEN("")`, 0},
+		{`LEN("four")`, 4},
+		{`LEN("hello world!")`, 12},
+		{`LEN(1)`, "argument to `LEN` not supported, got=INTEGER"},
+		{`LEN("one", "two")`, "wrong number of arguments. got=2, want=1"},
+
+		{`POSITION("computer science", "m")`, 2},
+		{`POSITION("comp")`, "wrong number of arguments. got=1, want=2"},
+		{`POSITION(5, "ten")`, "argument to `POSITION` not supported, got=INTEGER"},
+
+		{`SUBSTRING(2, 9, "computer science")`, "mputer s"},
+		{`SUBSTRING("oops", "oops", 5)`, "argument 1 to `SUBSTRING` not supported, got=STRING"},
+		{`SUBSTRING(2, "oops", 5)`, "argument 2 to `SUBSTRING` not supported, got=STRING"},
+		{`SUBSTRING(2, 3, 5)`, "argument 3 to `SUBSTRING` not supported, got=INTEGER"},
+		{`SUBSTRING(2, -1, "hello")`, "invalid bounds [2:-1] in call to SUBSTRING"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			switch evaluated := evaluated.(type) {
+			case *object.Error:
+				if evaluated.Message != expected {
+					t.Errorf("wrong error message. expected=%q, got=%q", expected, evaluated.Message)
+				}
+			case *object.String:
+				if evaluated.Value != expected {
+					t.Errorf("wrong string value. expected=%q, got=%q", expected, evaluated.Value)
+				}
+			}
+		}
 	}
 }
 

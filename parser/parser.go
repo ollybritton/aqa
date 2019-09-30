@@ -3,9 +3,9 @@ package parser
 import (
 	"strconv"
 
-	"github.com/ollybritton/aqa++/ast"
-	"github.com/ollybritton/aqa++/lexer"
-	"github.com/ollybritton/aqa++/token"
+	"github.com/ollybritton/aqa/ast"
+	"github.com/ollybritton/aqa/lexer"
+	"github.com/ollybritton/aqa/token"
 )
 
 // Definition of parsing functions.
@@ -41,6 +41,7 @@ func New(l *lexer.Lexer) *Parser {
 		token.MINUS: p.parsePrefixExpression,
 
 		token.LPAREN: p.parseGroupedExpression,
+		token.STRING: p.parseStringLiteral,
 	}
 
 	p.infixParseFns = map[token.Type]infixParseFn{
@@ -432,4 +433,8 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Tok: p.curToken, Value: p.curToken.Literal}
 }

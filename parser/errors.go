@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 
-	"github.com/ollybritton/aqa++/token"
+	"github.com/ollybritton/aqa/token"
 )
 
 // UnexpectedTokenError represents an error that occurs when the parser expects the next token to be something, but it isn't.

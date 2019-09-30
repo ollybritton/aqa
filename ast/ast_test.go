@@ -3,7 +3,7 @@ package ast
 import (
 	"testing"
 
-	"github.com/ollybritton/aqa++/token"
+	"github.com/ollybritton/aqa/token"
 	"github.com/stretchr/testify/assert"
 )
 

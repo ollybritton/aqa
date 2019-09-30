@@ -3,8 +3,8 @@ package parser
 import (
 	"testing"
 
-	"github.com/ollybritton/aqa++/ast"
-	"github.com/ollybritton/aqa++/lexer"
+	"github.com/ollybritton/aqa/ast"
+	"github.com/ollybritton/aqa/lexer"
 )
 
 // private test methods/utilities.

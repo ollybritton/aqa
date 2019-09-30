@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/ollybritton/aqa++/ast"
+	"github.com/ollybritton/aqa/ast"
 	"github.com/stretchr/testify/assert"
 )
 

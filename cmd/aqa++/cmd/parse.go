@@ -12,8 +12,8 @@ import (
 
 	"github.com/chzyer/readline"
 	au "github.com/logrusorgru/aurora"
-	"github.com/ollybritton/aqa++/lexer"
-	"github.com/ollybritton/aqa++/parser"
+	"github.com/ollybritton/aqa/lexer"
+	"github.com/ollybritton/aqa/parser"
 	"github.com/spf13/cobra"
 )
 

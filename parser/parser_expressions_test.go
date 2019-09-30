@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ollybritton/aqa++/ast"
+	"github.com/ollybritton/aqa/ast"
+	"github.com/pkg/profile"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -308,6 +309,24 @@ func TestSubroutineCallParsing(t *testing.T) {
 	testLiteralExpression(t, exp.Arguments[0], 1)
 	testInfixExpression(t, exp.Arguments[1], 2, "*", 3)
 	testInfixExpression(t, exp.Arguments[2], 4, "+", 5)
+}
+
+func TestStringLiteralExpression(t *testing.T) {
+	defer profile.Start().Stop()
+	input := `'hello\'s world!'`
+
+	_, program := parseProgram(t, input)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	literal, ok := stmt.Expression.(*ast.StringLiteral)
+
+	if !ok {
+		t.Fatalf("exp not *ast.StringLiteral. got=%T", literal)
+	}
+
+	if literal.Value != "hello's world!" {
+		t.Errorf("literal.Value not %q. got=%q", "hello's world!", literal.Value)
+	}
 }
 
 // private functions for testing

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/ollybritton/aqa++/token"
+	"github.com/ollybritton/aqa/token"
 )
 
 // VariableAssignment represents the process of assignment to a variable in the AST.

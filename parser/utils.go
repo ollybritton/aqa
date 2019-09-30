@@ -1,6 +1,6 @@
 package parser
 
-import "github.com/ollybritton/aqa++/token"
+import "github.com/ollybritton/aqa/token"
 
 func (p *Parser) curTokenIs(tt token.Type) bool {
 	return p.curToken.Type == tt

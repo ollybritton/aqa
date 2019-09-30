@@ -7,10 +7,11 @@ import (
 
 	"github.com/chzyer/readline"
 	au "github.com/logrusorgru/aurora"
-	"github.com/ollybritton/aqa++/evaluator"
-	"github.com/ollybritton/aqa++/lexer"
-	"github.com/ollybritton/aqa++/object"
-	"github.com/ollybritton/aqa++/parser"
+	"github.com/ollybritton/aqa/evaluator"
+	"github.com/ollybritton/aqa/lexer"
+	"github.com/ollybritton/aqa/object"
+	"github.com/ollybritton/aqa/parser"
+	"github.com/ollybritton/aqa/token"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +40,8 @@ var replCmd = &cobra.Command{
 		defer l.Close()
 
 		env := object.NewEnvironment()
+
+		var lvl int
 		var buffer string
 
 		for {
@@ -53,26 +56,42 @@ var replCmd = &cobra.Command{
 				break
 			}
 
-			if strings.HasSuffix(line, "\\") {
-				buffer += line[:len(line)-1] + "\n"
-			} else if buffer != "" {
-				buffer += line
-				eval(buffer, env)
+			buffer = buffer + line
+			end := eval(buffer, env)
+			if end {
 				buffer = ""
+				lvl = 0
 			} else {
-				eval(line, env)
+				lvl++
+				l.WriteStdin([]byte(
+					strings.Repeat("\t", lvl),
+				))
+				buffer += "\n"
 			}
 		}
 	},
 }
 
-func eval(input string, env *object.Environment) {
+func eval(input string, env *object.Environment) (end bool) {
 	l := lexer.New(input)
 	p := parser.New(l)
 
 	program := p.Parse()
-	if checkErrors(p) {
-		return
+	var hadError bool
+	for _, err := range p.Errors() {
+		e, ok := err.(parser.InvalidTokenError)
+		if !ok {
+			hadError = true
+			continue
+		}
+
+		if e.Unexpected.Type == token.EOF {
+			return false
+		}
+	}
+
+	if hadError {
+		checkErrors(p)
 	}
 
 	evaluated := evaluator.Eval(program, env)
@@ -83,6 +102,7 @@ func eval(input string, env *object.Environment) {
 	}
 
 	fmt.Println("")
+	return true
 }
 
 func init() {

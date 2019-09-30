@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/ollybritton/aqa++/token"
+	"github.com/ollybritton/aqa/token"
 )
 
 // Lexer is a lexer for an AQA++ program.
@@ -90,6 +90,36 @@ func (l *Lexer) readNumber() string {
 	return l.input[start:l.position]
 }
 
+// readString will read a string. A string is a set of characters surrounded by either a `'` or `"`
+func (l *Lexer) readString(start byte) string {
+	if start != '"' && start != '\'' {
+		panic("lexer: invalid char for start string: " + string(start))
+	}
+	l.startPosition = l.curLinePosition
+
+	l.readChar()
+	literal := ""
+
+	for {
+		switch {
+		case l.ch == start:
+			return literal
+
+		case l.ch == '\\' && l.peekChar() == start:
+			l.readChar()
+			literal += string(start)
+			l.readChar()
+
+		case l.ch == '\\':
+			l.readChar()
+
+		default:
+			literal += string(l.ch)
+			l.readChar()
+		}
+	}
+}
+
 // newSingleToken returns a new token from a token type.
 func (l *Lexer) newSingleToken(tokenType token.Type) token.Token {
 	return token.NewToken(tokenType, string(l.ch), l.curLine, l.curLinePosition)
@@ -174,6 +204,19 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = l.newSingleToken(token.LT)
 		}
+
+	// String handling
+	case '\'':
+		tok.Literal = l.readString('\'')
+		tok.Column = l.startPosition
+		tok.Line = l.curLine
+		tok.Type = token.STRING
+
+	case '"':
+		tok.Literal = l.readString('"')
+		tok.Column = l.startPosition
+		tok.Line = l.curLine
+		tok.Type = token.STRING
 
 	// Newline handling
 	case '\n':

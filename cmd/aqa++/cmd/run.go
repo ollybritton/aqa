@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/ollybritton/aqa++/object"
+	"github.com/ollybritton/aqa/object"
 
 	au "github.com/logrusorgru/aurora"
-	"github.com/ollybritton/aqa++/evaluator"
-	"github.com/ollybritton/aqa++/lexer"
-	"github.com/ollybritton/aqa++/parser"
+	"github.com/ollybritton/aqa/evaluator"
+	"github.com/ollybritton/aqa/lexer"
+	"github.com/ollybritton/aqa/parser"
 	"github.com/spf13/cobra"
 )
 

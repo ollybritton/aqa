@@ -1,6 +1,6 @@
 package parser
 
-import "github.com/ollybritton/aqa++/token"
+import "github.com/ollybritton/aqa/token"
 
 // Definitions of operator precedences.
 const (

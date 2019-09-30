@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ollybritton/aqa++/ast"
+	"github.com/ollybritton/aqa/ast"
 )
 
 // Type represents a type of object, such as an integer or a subroutine.
@@ -16,8 +16,10 @@ const (
 	INTEGER_OBJ  = "INTEGER"
 	BOOLEAN_OBJ  = "BOOLEAN"
 	FUNCTION_OBJ = "FUNCTION"
+	STRING_OBJ   = "STRING"
 
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
+	BUILTIN_OBJ      = "BUILTIN"
 	ERROR_OBJ        = "ERROR"
 	NULL_OBJ         = "NULL"
 )
@@ -27,6 +29,17 @@ type Object interface {
 	Type() Type      // Type reveals an object's type
 	Inspect() string // Inspect gets the value of the object as a string.
 }
+
+// BuiltinFunction represents an external function that is avaliable inside an AQA++ program.
+type BuiltinFunction func(args ...Object) Object
+
+// Builtin represents a builtin inside the program.
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+func (b *Builtin) Type() Type      { return BUILTIN_OBJ }
+func (b *Builtin) Inspect() string { return "<builtin>" }
 
 // Integer represents an integer within the program.
 type Integer struct {
@@ -98,3 +111,11 @@ func (s *Subroutine) Inspect() string {
 
 	return out.String()
 }
+
+// String represents a string within the evaluator.
+type String struct {
+	Value string
+}
+
+func (s *String) Type() Type      { return STRING_OBJ }
+func (s *String) Inspect() string { return s.Value }

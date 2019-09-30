@@ -1,8 +1,8 @@
 package evaluator
 
 import (
-	"github.com/ollybritton/aqa++/ast"
-	"github.com/ollybritton/aqa++/object"
+	"github.com/ollybritton/aqa/ast"
+	"github.com/ollybritton/aqa/object"
 )
 
 // Eval evaluates a node, and returns its representation as an object.Object.
@@ -45,29 +45,21 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		env.Set(name.Value, &object.Subroutine{Parameters: params, Env: env, Body: body, Name: name})
 
 	case *ast.SubroutineCall:
-		name := node.Subroutine.Value
+		ident := evalIdentifier(node.Subroutine, env)
 		args := evalExpressions(node.Arguments, env)
 		if len(args) == 1 && isError(args[0]) {
 			return args[0]
 		}
 
-		maybeSub, ok := env.Get(name)
-		if !ok {
-			return newError("unknown identifier: " + name)
-		}
-
-		sub, ok := maybeSub.(*object.Subroutine)
-		if !ok {
-			return newError("not a subroutine: " + maybeSub.Inspect())
-		}
-
-		return applySubroutine(sub, args)
+		return applySubroutine(ident, args)
 
 	// Literals
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 	case *ast.BooleanLiteral:
 		return nativeBoolToBooleanObject(node.Value)
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 
 	// Expressions
 	case *ast.PrefixExpression:
@@ -186,11 +178,16 @@ func evalInfixExpression(left object.Object, operator string, right object.Objec
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(left, operator, right)
+
 	case left.Type() == object.BOOLEAN_OBJ && right.Type() == object.BOOLEAN_OBJ:
 		return evalBooleanInfixExpression(left, operator, right)
 
+	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(left, operator, right)
+
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
+
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
@@ -239,6 +236,19 @@ func evalBooleanInfixExpression(left object.Object, operator string, right objec
 	}
 }
 
+func evalStringInfixExpression(left object.Object, operator string, right object.Object) object.Object {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+
+	switch operator {
+	case "+":
+		return &object.String{Value: leftVal + rightVal}
+
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
 func evalIfStatement(node *ast.IfStatement, env *object.Environment) object.Object {
 	condition := Eval(node.Condition, env)
 	if isError(condition) {
@@ -268,18 +278,30 @@ func evalIfStatement(node *ast.IfStatement, env *object.Environment) object.Obje
 }
 
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: " + node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
 
-	return val
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+
+	return newError("identifier not found: " + node.Value)
 }
 
-func applySubroutine(sub *object.Subroutine, args []object.Object) object.Object {
-	extended := extendSubroutineEnv(sub, args)
-	evaluated := Eval(sub.Body, extended)
-	return unwrapReturnValue(evaluated)
+func applySubroutine(sub object.Object, args []object.Object) object.Object {
+	switch sub := sub.(type) {
+	case *object.Subroutine:
+		extended := extendSubroutineEnv(sub, args)
+		evaluated := Eval(sub.Body, extended)
+		return unwrapReturnValue(evaluated)
+
+	case *object.Builtin:
+		return sub.Fn(args...)
+
+	default:
+		return newError("not a subroutine, function or builtin: %s", sub.Type())
+	}
 }
 
 func extendSubroutineEnv(sub *object.Subroutine, args []object.Object) *object.Environment {
