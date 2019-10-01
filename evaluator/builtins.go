@@ -1,6 +1,16 @@
 package evaluator
 
-import "github.com/ollybritton/aqa/object"
+import (
+	"math/rand"
+	"strconv"
+	"time"
+
+	"github.com/ollybritton/aqa/object"
+)
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 var builtins = map[string]*object.Builtin{
 	"LEN": &object.Builtin{
@@ -73,6 +83,94 @@ var builtins = map[string]*object.Builtin{
 			}
 
 			return &object.String{Value: str.Value[start.Value : end.Value+1]}
+		},
+	},
+
+	"STRING_TO_INT": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+
+			str, ok := args[0].(*object.String)
+			if !ok {
+				return newError("argument to `STRING_TO_INT` not supported, got=%s", args[0].Type())
+			}
+
+			conv, err := strconv.ParseInt(str.Value, 10, 64)
+			if err != nil {
+				return newError("failed to convert %q to integer in call to `STRING_TO_INT`", str.Value)
+			}
+
+			return &object.Integer{Value: conv}
+		},
+	},
+	"INT_TO_STRING": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+
+			i, ok := args[0].(*object.Integer)
+			if !ok {
+				return newError("argument to `INT_TO_STRING` not supported, got=%s", args[0].Type())
+			}
+
+			conv := strconv.FormatInt(i.Value, 10)
+			return &object.String{Value: conv}
+		},
+	},
+	"CHAR_TO_CODE": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+
+			str, ok := args[0].(*object.String)
+			if !ok {
+				return newError("argument to `CHAR_TO_CODE` not supported, got=%s", args[0].Type())
+			}
+
+			if len(str.Value) != 1 {
+				return newError("argument to `CHAR_TO_CODE` not supported, cannot convert multiple characters, got=%s", str.Value)
+			}
+
+			return &object.Integer{Value: int64(str.Value[0])}
+		},
+	},
+	"CODE_TO_CHAR": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+
+			i, ok := args[0].(*object.Integer)
+			if !ok {
+				return newError("argument to `CODE_TO_CHAR` not supported, got=%s", args[0].Type())
+			}
+
+			return &object.String{Value: string(byte(i.Value))}
+		},
+	},
+
+	"RANDOM_INT": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 2 {
+				return newError("wrong number of arguments. got=%d, want=2", len(args))
+			}
+
+			lower, ok := args[0].(*object.Integer)
+			if !ok {
+				return newError("argument 1 to `RANDOM_INT` not supported, got=%s", args[0].Type())
+			}
+
+			upper, ok := args[1].(*object.Integer)
+			if !ok {
+				return newError("argument 2 to `RANDOM_INT` not supported, got=%s", args[1].Type())
+			}
+
+			val := rand.Intn(int(upper.Value-lower.Value+1)) + int(lower.Value)
+			return &object.Integer{Value: int64(val)}
 		},
 	},
 }

@@ -21,6 +21,15 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IfStatement:
 		return evalIfStatement(node, env)
 
+	case *ast.WhileStatement:
+		return evalWhileStatement(node, env)
+
+	case *ast.ForStatement:
+		return evalForStatement(node, env)
+
+	case *ast.RepeatStatement:
+		return evalRepeatStatement(node, env)
+
 	case *ast.ReturnStatement:
 		val := Eval(node.ReturnValue, env)
 		if isError(val) {
@@ -287,6 +296,78 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	}
 
 	return newError("identifier not found: " + node.Value)
+}
+
+func evalWhileStatement(node *ast.WhileStatement, env *object.Environment) object.Object {
+	val := Eval(node.Condition, env)
+	if isError(val) {
+		return val
+	}
+
+	cond, ok := val.(*object.Boolean)
+	if !ok {
+		return newError("need a boolean for while loop, not %T", val)
+	}
+
+	var result object.Object
+
+	for cond.Value {
+		result = Eval(node.Body, env)
+		if isError(result) {
+			return result
+		}
+
+		cond, ok = Eval(node.Condition, env).(*object.Boolean)
+		if !ok {
+			return newError("need a boolean for while loop, not %T", cond)
+		}
+	}
+
+	return result
+}
+
+func evalForStatement(node *ast.ForStatement, env *object.Environment) object.Object {
+	extended := object.NewEnclosedEnvironment(env)
+	var val object.Object
+
+	for i := node.Lower.Value; i <= node.Upper.Value; i++ {
+		extended.Set(node.Ident.Value, &object.Integer{Value: i})
+		val = Eval(node.Body, extended)
+
+		if isError(val) {
+			return val
+		}
+	}
+
+	return val
+}
+
+func evalRepeatStatement(node *ast.RepeatStatement, env *object.Environment) object.Object {
+	val := Eval(node.Condition, env)
+	if isError(val) {
+		return val
+	}
+
+	cond, ok := val.(*object.Boolean)
+	if !ok {
+		return newError("need a boolean for while loop, not %T", val)
+	}
+
+	var result object.Object
+
+	for !cond.Value {
+		result = Eval(node.Body, env)
+		if isError(result) {
+			return result
+		}
+
+		cond, ok = Eval(node.Condition, env).(*object.Boolean)
+		if !ok {
+			return newError("need a boolean for while loop, not %T", cond)
+		}
+	}
+
+	return result
 }
 
 func applySubroutine(sub object.Object, args []object.Object) object.Object {

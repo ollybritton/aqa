@@ -108,6 +108,12 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseIfStatement()
 	case p.curToken.Type == token.SUBROUTINE:
 		return p.parseSubroutineDefinition()
+	case p.curToken.Type == token.WHILE:
+		return p.parseWhileStatement()
+	case p.curToken.Type == token.FOR:
+		return p.parseForStatement()
+	case p.curToken.Type == token.REPEAT:
+		return p.parseRepeatStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -437,4 +443,71 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 
 func (p *Parser) parseStringLiteral() ast.Expression {
 	return &ast.StringLiteral{Tok: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseWhileStatement() *ast.WhileStatement {
+	while := &ast.WhileStatement{Tok: p.curToken}
+	p.nextToken()
+
+	while.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.NEWLINE) {
+		p.addError(NewUnexpectedTokenError(p.curToken, p.peekToken, token.NEWLINE))
+	}
+	while.Body = p.parseBlockStatement([]token.Type{token.BLOCK_END})
+
+	return while
+}
+
+func (p *Parser) parseForStatement() *ast.ForStatement {
+	stmt := &ast.ForStatement{Tok: p.curToken}
+	p.nextToken()
+
+	stmt.Ident = p.parseIdentifier().(*ast.Identifier)
+
+	if !p.expectPeek(token.ASSIGN) {
+		p.addError(NewInvalidTokenError(p.curToken, p.peekToken, p.curToken))
+		return &ast.ForStatement{}
+	}
+	p.nextToken()
+
+	lower, ok := p.parseIntegerLiteral().(*ast.IntegerLiteral)
+	if !ok {
+		p.addError(NewUnexpectedTokenError(p.curToken, p.peekToken, token.INT))
+		return &ast.ForStatement{}
+	}
+
+	if !p.expectPeek(token.TO) {
+		p.addError(NewInvalidTokenError(p.curToken, p.peekToken, p.curToken))
+		return &ast.ForStatement{}
+	}
+	p.nextToken()
+
+	upper, ok := p.parseIntegerLiteral().(*ast.IntegerLiteral)
+	if !ok {
+		p.addError(NewUnexpectedTokenError(p.curToken, p.peekToken, token.INT))
+		return &ast.ForStatement{}
+	}
+
+	stmt.Lower = lower
+	stmt.Upper = upper
+
+	if !p.expectPeek(token.NEWLINE) {
+		p.addError(NewUnexpectedTokenError(p.curToken, p.peekToken, token.NEWLINE))
+	}
+
+	stmt.Body = p.parseBlockStatement([]token.Type{token.BLOCK_END})
+
+	return stmt
+}
+
+func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
+	repeat := &ast.RepeatStatement{Tok: p.curToken}
+
+	repeat.Body = p.parseBlockStatement([]token.Type{token.UNTIL})
+	p.nextToken()
+
+	repeat.Condition = p.parseExpression(LOWEST)
+
+	return repeat
 }

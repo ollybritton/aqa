@@ -69,6 +69,12 @@ const (
 	ELSE       = "ELSE"
 	RETURN     = "RETURN"
 
+	WHILE  = "WHILE"
+	REPEAT = "REPEAT"
+	UNTIL  = "UNTIL"
+	FOR    = "FOR"
+	TO     = "TO"
+
 	// Blocks
 	BLOCK_START = "BLOCK_START"
 	BLOCK_END   = "BLOCK_END"
@@ -95,6 +101,16 @@ var Keywords = map[string]Type{
 	"if":         IF,
 	"else":       ELSE,
 	"subroutine": SUBROUTINE,
+
+	"while":    WHILE,
+	"endwhile": BLOCK_END,
+
+	"repeat": REPEAT,
+	"until":  UNTIL,
+
+	"for":    FOR,
+	"endfor": BLOCK_END,
+	"to":     TO,
 
 	"then":          BLOCK_START, // IF <CONDITION> THEN ... ENDIF
 	"endif":         BLOCK_END,

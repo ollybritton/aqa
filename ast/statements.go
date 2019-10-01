@@ -185,3 +185,95 @@ func (s *Subroutine) String() string {
 
 	return out.String()
 }
+
+// WhileStatement represents a while statement within the program.
+// Example:
+//   WHILE a != 20
+//     a <- a + 1
+//   ENDWHILE
+// General:
+//   WHILE {Boolean Expresion}
+//     {Statements}
+//   ENDWHILE
+type WhileStatement struct {
+	Tok       token.Token // The token.WHILE token.
+	Condition Expression
+
+	Body *BlockStatement
+}
+
+func (ws *WhileStatement) statementNode()     {}
+func (ws *WhileStatement) Token() token.Token { return ws.Tok }
+func (ws *WhileStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("WHILE ")
+	out.WriteString(ws.Condition.String())
+	out.WriteString("\n")
+
+	out.WriteString(ws.Body.String())
+	out.WriteString("\n")
+
+	out.WriteString("ENDWHILE")
+
+	return out.String()
+}
+
+// ForStatement represents a for statement within the program.
+// Example:
+//   FOR i <- 10 TO 20
+//     a <- a + 1
+//   ENDFOR
+// General:
+//   FOR {IDENT} <- {INT} TO {INT}
+//     {STATEMENTS}
+//   ENDFOR
+type ForStatement struct {
+	Tok token.Token // the token.FOR statement.
+
+	Ident *Identifier
+	Lower *IntegerLiteral
+	Upper *IntegerLiteral
+	Body  *BlockStatement
+}
+
+func (fs *ForStatement) statementNode()     {}
+func (fs *ForStatement) Token() token.Token { return fs.Tok }
+func (fs *ForStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("FOR ")
+	out.WriteString(fs.Ident.String())
+	out.WriteString(" <- ")
+	out.WriteString(fs.Lower.String())
+	out.WriteString(" TO ")
+	out.WriteString(fs.Upper.String())
+	out.WriteString("\n")
+
+	out.WriteString(fs.Body.String())
+
+	out.WriteString("\n")
+	out.WriteString("ENDFOR")
+
+	return out.String()
+}
+
+// RepeatStatement represents a repeat...until statement inside the program.
+type RepeatStatement struct {
+	Tok       token.Token // the token.REPEAT token
+	Condition Expression
+	Body      *BlockStatement
+}
+
+func (rs *RepeatStatement) statementNode()     {}
+func (rs *RepeatStatement) Token() token.Token { return rs.Tok }
+func (rs *RepeatStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("REPEAT\n")
+	out.WriteString(rs.Body.String())
+	out.WriteString("\nUNTIL ")
+	out.WriteString(rs.Condition.String())
+
+	return out.String()
+}

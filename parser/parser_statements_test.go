@@ -240,6 +240,111 @@ ENDIF`
 	}
 }
 
+func TestWhileStatement(t *testing.T) {
+	input := `WHILE a != 10
+	a <- a + 1
+ENDWHILE`
+
+	_, program := parseProgram(t, input)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d", 1, len(program.Statements))
+	}
+
+	while, ok := program.Statements[0].(*ast.WhileStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.WhileStatement. got=%T", program.Statements[0])
+	}
+
+	if while.Condition == nil {
+		t.Fatalf("while.Condition is nil.")
+	}
+
+	if while.Condition.String() != "(a != 10)" {
+		t.Fatalf("while.Condition is not equal to `(a != 10)`. got=%s", while.Condition.String())
+	}
+
+	if len(while.Body.Statements) != 1 {
+		t.Fatalf("while.Body.Statements does not contain %d statements. got=%d", 1, len(while.Body.Statements))
+	}
+
+	_, ok = while.Body.Statements[0].(*ast.VariableAssignment)
+	if !ok {
+		t.Fatalf("while.Body.Statements[0] is not *ast.VariableAssignment. got=%T", while.Body.Statements[0])
+	}
+
+}
+
+func TestRepeatStatement(t *testing.T) {
+	input := `REPEAT
+	a <- a + 1
+UNTIL a == 10`
+
+	_, program := parseProgram(t, input)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d", 1, len(program.Statements))
+	}
+
+	repeat, ok := program.Statements[0].(*ast.RepeatStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.WhileStatement. got=%T", program.Statements[0])
+	}
+
+	if repeat.Condition == nil {
+		t.Fatalf("repeat.Condition is nil.")
+	}
+
+	if repeat.Condition.String() != "(a == 10)" {
+		t.Fatalf("repeat.Condition is not equal to `(a == 10)`. got=%s", repeat.Condition.String())
+	}
+
+	if len(repeat.Body.Statements) != 1 {
+		t.Fatalf("repeat.Body.Statements does not contain %d statements. got=%d", 1, len(repeat.Body.Statements))
+	}
+
+	_, ok = repeat.Body.Statements[0].(*ast.VariableAssignment)
+	if !ok {
+		t.Fatalf("repeat.Body.Statements[0] is not *ast.VariableAssignment. got=%T", repeat.Body.Statements[0])
+	}
+
+}
+func TestForStatement(t *testing.T) {
+	input := `FOR i <- 10 TO 20
+  a <- a + 1
+ENDFOR`
+
+	_, program := parseProgram(t, input)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d", 1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ForStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.WhileStatement. got=%T", program.Statements[0])
+	}
+
+	if stmt.Ident.Value != "i" {
+		t.Fatalf("incorrect for loop variable. got=%s, want=%s", stmt.Ident.Value, "i")
+	}
+
+	if stmt.Lower.Value != 10 {
+		t.Fatalf("incorrect for loop lower bound. got=%d, want=%d", stmt.Lower.Value, 10)
+	}
+
+	if stmt.Upper.Value != 20 {
+		t.Fatalf("incorrect for loop upper bound. got=%d, want=%d", stmt.Upper.Value, 10)
+	}
+
+	if len(stmt.Body.Statements) != 1 {
+		t.Fatalf("stmt.Body.Statements does not contain %d statements. got=%d", 1, len(stmt.Body.Statements))
+	}
+
+	_, ok = stmt.Body.Statements[0].(*ast.VariableAssignment)
+	if !ok {
+		t.Fatalf("stmt.Body.Statements[0] is not *ast.VariableAssignment. got=%T", stmt.Body.Statements[0])
+	}
+
+}
+
 // private methods to help with statement tests
 func testVariableAssignment(t *testing.T, s ast.Statement, expectedName string) bool {
 	if s.Token().Literal != expectedName {

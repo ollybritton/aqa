@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/ollybritton/aqa/ast"
-	"github.com/pkg/profile"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -312,7 +311,6 @@ func TestSubroutineCallParsing(t *testing.T) {
 }
 
 func TestStringLiteralExpression(t *testing.T) {
-	defer profile.Start().Stop()
 	input := `'hello\'s world!'`
 
 	_, program := parseProgram(t, input)

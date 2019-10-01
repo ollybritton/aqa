@@ -1,5 +1,7 @@
-SUBROUTINE say_hello(name)
-    return "Hello, " + name
-ENDSUBROUTINE
+a <- 20
 
-say_hello("Steve")
+while a + 1
+    a <- a - 3
+endwhile
+
+a

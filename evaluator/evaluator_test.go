@@ -137,6 +137,52 @@ func TestIfElseStatements(t *testing.T) {
 	}
 }
 
+func TestWhileStatement(t *testing.T) {
+	input := `
+a <- 0
+WHILE a < 10
+	a <- a + 1
+ENDWHILE
+
+return a`
+
+	evaluated := testEval(t, input)
+	if returnVal, ok := evaluated.(*object.ReturnValue); ok {
+		testIntegerObject(t, returnVal.Value, 10)
+	}
+}
+
+func TestRepeatStatement(t *testing.T) {
+	input := `
+a <- 0
+
+REPEAT
+	a <- a + 1
+UNTIL a > 10
+
+return a`
+
+	evaluated := testEval(t, input)
+	if returnVal, ok := evaluated.(*object.ReturnValue); ok {
+		testIntegerObject(t, returnVal.Value, 10)
+	}
+}
+
+func TestForStatement(t *testing.T) {
+	input := `
+a <- 0
+FOR i <- 1 TO 10
+	a <- a + i
+ENDFOR
+
+return a`
+
+	evaluated := testEval(t, input)
+	if returnVal, ok := evaluated.(*object.ReturnValue); ok {
+		testIntegerObject(t, returnVal.Value, 55)
+	}
+}
+
 func TestReturnStatements(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -338,6 +384,28 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`SUBSTRING(2, "oops", 5)`, "argument 2 to `SUBSTRING` not supported, got=STRING"},
 		{`SUBSTRING(2, 3, 5)`, "argument 3 to `SUBSTRING` not supported, got=INTEGER"},
 		{`SUBSTRING(2, -1, "hello")`, "invalid bounds [2:-1] in call to SUBSTRING"},
+
+		{`STRING_TO_INT('16')`, 16},
+		{`STRING_TO_INT('16', '16')`, "wrong number of arguments. got=2, want=1"},
+		{`STRING_TO_INT(10)`, "argument to `STRING_TO_INT` not supported, got=INTEGER"},
+		{`STRING_TO_INT('abc')`, "failed to convert \"abc\" to integer in call to `STRING_TO_INT`"},
+
+		{`INT_TO_STRING(16)`, "16"},
+		{`INT_TO_STRING(16, 16)`, "wrong number of arguments. got=2, want=1"},
+		{`INT_TO_STRING("10")`, "argument to `INT_TO_STRING` not supported, got=STRING"},
+
+		{`CHAR_TO_CODE('a')`, 97},
+		{`CHAR_TO_CODE('a', 'a')`, "wrong number of arguments. got=2, want=1"},
+		{`CHAR_TO_CODE(97)`, "argument to `CHAR_TO_CODE` not supported, got=INTEGER"},
+		{`CHAR_TO_CODE('abc')`, "argument to `CHAR_TO_CODE` not supported, cannot convert multiple characters, got=abc"},
+
+		{`CODE_TO_CHAR(97)`, "a"},
+		{`CODE_TO_CHAR(97, 97)`, "wrong number of arguments. got=2, want=1"},
+		{`CODE_TO_CHAR("a")`, "argument to `CODE_TO_CHAR` not supported, got=STRING"},
+
+		{`RANDOM_INT(1)`, "wrong number of arguments. got=1, want=2"},
+		{`RANDOM_INT('a', 2)`, "argument 1 to `RANDOM_INT` not supported, got=STRING"},
+		{`RANDOM_INT(2, 'a')`, "argument 2 to `RANDOM_INT` not supported, got=STRING"},
 	}
 
 	for _, tt := range tests {

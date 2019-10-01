@@ -19,7 +19,16 @@ ten <- 10
 'foobar'
 'foo bar'
 'foo\'s bar'
-"foo\"s bar"`
+"foo\"s bar"
+WHILE true
+	a
+ENDWHILE
+REPEAT
+	a
+UNTIL false
+FOR i <- 10 TO 20
+	a
+ENDFOR`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -59,6 +68,7 @@ ten <- 10
 		{Type: token.RBRACKET, Literal: "]", Line: 5, Column: 15},
 		{Type: token.RBRACE, Literal: "}", Line: 5, Column: 16},
 		{Type: token.RPAREN, Literal: ")", Line: 5, Column: 17},
+
 		{Type: token.NEWLINE, Literal: "\n", Line: 5, Column: 18},
 		{Type: token.STRING, Literal: "foobar", Line: 6, Column: 0},
 		{Type: token.NEWLINE, Literal: "\n", Line: 6, Column: 8},
@@ -71,7 +81,35 @@ ten <- 10
 		{Type: token.STRING, Literal: "foo's bar", Line: 10, Column: 0},
 		{Type: token.NEWLINE, Literal: "\n", Line: 10, Column: 12},
 		{Type: token.STRING, Literal: "foo\"s bar", Line: 11, Column: 0},
-		{Type: token.EOF, Literal: "", Line: 11, Column: 11},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 11, Column: 12},
+		{Type: token.WHILE, Literal: "WHILE", Line: 12, Column: 0},
+		{Type: token.TRUE, Literal: "true", Line: 12, Column: 6},
+		{Type: token.NEWLINE, Literal: "\n", Line: 12, Column: 10},
+		{Type: token.IDENT, Literal: "a", Line: 13, Column: 1},
+		{Type: token.NEWLINE, Literal: "\n", Line: 13, Column: 2},
+		{Type: token.BLOCK_END, Literal: "ENDWHILE", Line: 14, Column: 0},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 14, Column: 8},
+		{Type: token.REPEAT, Literal: "REPEAT", Line: 15, Column: 0},
+		{Type: token.NEWLINE, Literal: "\n", Line: 15, Column: 6},
+		{Type: token.IDENT, Literal: "a", Line: 16, Column: 1},
+		{Type: token.NEWLINE, Literal: "\n", Line: 16, Column: 2},
+		{Type: token.UNTIL, Literal: "UNTIL", Line: 17, Column: 0},
+		{Type: token.FALSE, Literal: "false", Line: 17, Column: 6},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 17, Column: 11},
+		{Type: token.FOR, Literal: "FOR", Line: 18, Column: 0},
+		{Type: token.IDENT, Literal: "i", Line: 18, Column: 4},
+		{Type: token.ASSIGN, Literal: "<-", Line: 18, Column: 6},
+		{Type: token.INT, Literal: "10", Line: 18, Column: 9},
+		{Type: token.TO, Literal: "TO", Line: 18, Column: 12},
+		{Type: token.INT, Literal: "20", Line: 18, Column: 15},
+		{Type: token.NEWLINE, Literal: "\n", Line: 18, Column: 17},
+		{Type: token.IDENT, Literal: "a", Line: 19, Column: 1},
+		{Type: token.NEWLINE, Literal: "\n", Line: 19, Column: 2},
+		{Type: token.BLOCK_END, Literal: "ENDFOR", Line: 20, Column: 0},
+		{Type: token.EOF, Literal: "", Line: 20, Column: 5},
 	}
 
 	l := New(input)
