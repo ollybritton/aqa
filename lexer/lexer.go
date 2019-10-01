@@ -65,6 +65,26 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
+// skipComment will skip over a comment.
+func (l *Lexer) skipComment() {
+	if l.ch != '#' {
+		return
+	}
+
+	for l.ch != '\n' {
+		l.readChar()
+	}
+
+	l.readChar()
+
+	l.curLine++
+	l.curLinePosition = 0
+
+	if l.ch == '#' {
+		l.skipComment()
+	}
+}
+
 // readIdentifier will reads a set of characters (including an underscore) and returns the string representation of that
 // set of characters.
 func (l *Lexer) readIdentifier() string {
@@ -129,6 +149,7 @@ func (l *Lexer) newSingleToken(tokenType token.Type) token.Token {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
+	l.skipComment()
 	l.skipWhitespace()
 
 	switch l.ch {

@@ -75,6 +75,10 @@ const (
 	FOR    = "FOR"
 	TO     = "TO"
 
+	// Special 'functions'
+	OUTPUT    = "OUTPUT"
+	USERINPUT = "USERINPUT"
+
 	// Blocks
 	BLOCK_START = "BLOCK_START"
 	BLOCK_END   = "BLOCK_END"
@@ -115,6 +119,9 @@ var Keywords = map[string]Type{
 	"then":          BLOCK_START, // IF <CONDITION> THEN ... ENDIF
 	"endif":         BLOCK_END,
 	"endsubroutine": BLOCK_END,
+
+	"output":    OUTPUT,
+	"userinput": USERINPUT,
 }
 
 // LookupKeyword converts a keyword name into a keyword.

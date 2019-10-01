@@ -1,6 +1,9 @@
 package evaluator
 
 import (
+	"bufio"
+	"os"
+
 	"github.com/ollybritton/aqa/ast"
 	"github.com/ollybritton/aqa/object"
 )
@@ -293,6 +296,12 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 
 	if builtin, ok := builtins[node.Value]; ok {
 		return builtin
+	}
+
+	if node.Value == "USERINPUT" || node.Value == "userinput" {
+		reader := bufio.NewReader(os.Stdin)
+		text, _ := reader.ReadString('\n')
+		return &object.String{Value: text}
 	}
 
 	return newError("identifier not found: " + node.Value)

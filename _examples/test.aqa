@@ -1,7 +1,4 @@
-a <- 20
+# Test
+# Test again
 
-while a + 1
-    a <- a - 3
-endwhile
-
-a
+OUTPUT userinput

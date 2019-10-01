@@ -42,6 +42,9 @@ func New(l *lexer.Lexer) *Parser {
 
 		token.LPAREN: p.parseGroupedExpression,
 		token.STRING: p.parseStringLiteral,
+
+		token.OUTPUT:    p.parseOutput,
+		token.USERINPUT: p.parseUserinput,
 	}
 
 	p.infixParseFns = map[token.Type]infixParseFn{
@@ -510,4 +513,18 @@ func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
 	repeat.Condition = p.parseExpression(LOWEST)
 
 	return repeat
+}
+
+func (p *Parser) parseOutput() ast.Expression {
+	call := &ast.SubroutineCall{Tok: p.curToken}
+	call.Subroutine = &ast.Identifier{Tok: p.curToken, Value: "OUTPUT"}
+	p.nextToken()
+
+	call.Arguments = []ast.Expression{p.parseExpression(LOWEST)}
+
+	return call
+}
+
+func (p *Parser) parseUserinput() ast.Expression {
+	return &ast.Identifier{Tok: p.curToken, Value: "USERINPUT"}
 }

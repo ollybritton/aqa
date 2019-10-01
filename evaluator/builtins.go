@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -171,6 +172,21 @@ var builtins = map[string]*object.Builtin{
 
 			val := rand.Intn(int(upper.Value-lower.Value+1)) + int(lower.Value)
 			return &object.Integer{Value: int64(val)}
+		},
+	},
+
+	"OUTPUT": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+
+			for _, a := range args {
+				fmt.Printf("%s ", a.Inspect())
+			}
+
+			fmt.Print("\n")
+			return NULL
 		},
 	},
 }
