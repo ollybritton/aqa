@@ -8,10 +8,8 @@ It is interpreted diffentely to most production-ready languages, as there is no 
 ## Demo
 For now, if you want to try it out, you can go to [https://aqa.ollybr.repl.run/](https://aqa.ollybr.repl.run/) for a REPL and [https://repl.it/@ollybr/AQA](https://repl.it/@ollybr/AQA) if you want to write a file. Both of those are just REPL.ITs that download the executable from my website and run it.
 
-
-## Bugs
+## Bugs
 See [BUGS](./BUGS.md)
 
-
-## Design
+## Design
 See [DESIGN](./DESIGN.md)
