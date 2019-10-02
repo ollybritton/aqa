@@ -3,6 +3,8 @@ package evaluator
 import (
 	"bufio"
 	"os"
+	"strings"
+	"strconv"
 
 	"github.com/ollybritton/aqa/ast"
 	"github.com/ollybritton/aqa/object"
@@ -257,8 +259,24 @@ func evalStringInfixExpression(left object.Object, operator string, right object
 		return &object.String{Value: leftVal + rightVal}
 
 	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+		// Translate the strings into integers
+		l, err := strconv.ParseInt(leftVal, 10, 64)
+		if err != nil {
+			break
+		}
+
+		r, err := strconv.ParseInt(rightVal, 10, 64)
+		if err != nil {
+			break
+		}
+
+		lobj := &object.Integer{Value: l}
+		robj := &object.Integer{Value: r}
+
+		return evalIntegerInfixExpression(lobj, operator, robj)
 	}
+
+	return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 }
 
 func evalIfStatement(node *ast.IfStatement, env *object.Environment) object.Object {
@@ -301,6 +319,7 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	if node.Value == "USERINPUT" || node.Value == "userinput" {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
+		text = strings.Trim(text, "\n")
 		return &object.String{Value: text}
 	}
 
