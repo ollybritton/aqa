@@ -36,6 +36,20 @@ func (il *IntegerLiteral) String() string {
 	return fmt.Sprint(il.Value)
 }
 
+// FloatLiteral represents an float value in the AST.
+// Example: `5.5`
+// General: `{token.INT}`
+type FloatLiteral struct {
+	Tok   token.Token // the token.FLOAT token.
+	Value float64
+}
+
+func (fl *FloatLiteral) expressionNode()    {}
+func (fl *FloatLiteral) Token() token.Token { return fl.Tok }
+func (fl *FloatLiteral) String() string {
+	return fmt.Sprint(fl.Value)
+}
+
 // BooleanLiteral represents a boolean in the AST.
 // Example: `true`
 // General: `{token.TRUE or token.FALSE}`

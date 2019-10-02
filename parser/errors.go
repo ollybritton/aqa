@@ -85,6 +85,32 @@ func NewIntegerParseError(curTok, peekTok token.Token, value string) IntegerPars
 	}
 }
 
+// FloatParseError represents an error that occurs when trying to parse an string into a 64-bit float.
+type FloatParseError struct {
+	Message string
+
+	CurTok  token.Token
+	PeekTok token.Token
+	Value   string
+}
+
+func (e FloatParseError) Error() string {
+	return e.Message
+}
+
+// NewFloatParseError returns a new FloatParseError.
+func NewFloatParseError(curTok, peekTok token.Token, value string) FloatParseError {
+	msg := fmt.Sprintf("could not parse %q as float", value)
+
+	return FloatParseError{
+		Message: msg,
+
+		CurTok:  curTok,
+		PeekTok: peekTok,
+		Value:   value,
+	}
+}
+
 // NoPrefixParseFnError represents an error that occurs when the parser encounters a token it doesn't have a prefix parse
 // function for.
 type NoPrefixParseFnError struct {

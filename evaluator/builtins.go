@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"strconv"
 	"time"
@@ -98,7 +99,7 @@ var builtins = map[string]*object.Builtin{
 				return newError("argument to `STRING_TO_INT` not supported, got=%s", args[0].Type())
 			}
 
-			conv, err := strconv.ParseInt(str.Value, 10, 64)
+			conv, err := strconv.ParseInt(str.Value, 0, 64)
 			if err != nil {
 				return newError("failed to convert %q to integer in call to `STRING_TO_INT`", str.Value)
 			}
@@ -187,6 +188,23 @@ var builtins = map[string]*object.Builtin{
 
 			fmt.Print("\n")
 			return NULL
+		},
+	},
+
+	"FLOOR": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+
+			switch val := args[0].(type) {
+			case *object.Float:
+				return &object.Integer{Value: int64(math.Floor(val.Value))}
+			case *object.Integer:
+				return val
+			default:
+				return newError("argument to `FLOOR` not supported, got=%s", args[0].Type())
+			}
 		},
 	},
 }

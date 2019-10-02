@@ -53,6 +53,31 @@ func TestIntegerLiteralExpression(t *testing.T) {
 
 }
 
+func TestFloatLiteralExpression(t *testing.T) {
+	input := "5.5"
+
+	_, program := parseProgram(t, input)
+
+	ok := assert.Equal(t, 1, len(program.Statements), "program should contain exactly 1 statement. got=%d", len(program.Statements))
+	if !ok {
+		t.FailNow()
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	literal, ok := stmt.Expression.(*ast.FloatLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.FloatLiteral. got=%T", stmt.Expression)
+	}
+
+	assert.Equal(t, 5.5, literal.Value, "literal.Value should equal 5.5")
+	assert.Equal(t, "5.5", literal.Tok.Literal, "literal.Tok.Literal should equal '5.5'")
+
+}
+
 func TestBooleanLiteralExpression(t *testing.T) {
 	input := "true"
 
@@ -401,6 +426,26 @@ func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 
 	if integ.Token().Literal != fmt.Sprintf("%d", value) {
 		t.Errorf("integ.Tok.Literal not %d. got=%s", value, integ.Token().Literal)
+		return false
+	}
+
+	return true
+}
+
+func testFloatLiteral(t *testing.T, fl ast.Expression, value float64) bool {
+	float, ok := fl.(*ast.FloatLiteral)
+	if !ok {
+		t.Errorf("fl not *ast.FloatLiteral. got=%T", fl)
+		return false
+	}
+
+	if float.Value != value {
+		t.Errorf("float.Value not %f. got=%f", value, float.Value)
+		return false
+	}
+
+	if float.Token().Literal != fmt.Sprintf("%f", value) {
+		t.Errorf("float.Tok.Literal not %f. got=%s", value, float.Token().Literal)
 		return false
 	}
 

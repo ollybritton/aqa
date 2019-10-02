@@ -32,7 +32,10 @@ FOR i <- 10 TO 20
 ENDFOR
 # Twice
 # Twice
-OUTPUT USERINPUT`
+OUTPUT USERINPUT
+1.234
+0xBADA55
+0b10`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -119,7 +122,14 @@ OUTPUT USERINPUT`
 		{Type: token.OUTPUT, Literal: "OUTPUT", Line: 24, Column: 0},
 		{Type: token.USERINPUT, Literal: "USERINPUT", Line: 24, Column: 7},
 
-		{Type: token.EOF, Literal: "", Line: 24, Column: 15},
+		{Type: token.NEWLINE, Literal: "\n", Line: 24, Column: 16},
+		{Type: token.FLOAT, Literal: "1.234", Line: 25, Column: 0},
+		{Type: token.NEWLINE, Literal: "\n", Line: 25, Column: 5},
+		{Type: token.INT, Literal: "0xBADA55", Line: 26, Column: 0},
+		{Type: token.NEWLINE, Literal: "\n", Line: 26, Column: 8},
+		{Type: token.INT, Literal: "0b10", Line: 27, Column: 0},
+
+		{Type: token.EOF, Literal: "", Line: 27, Column: 3},
 	}
 
 	l := New(input)

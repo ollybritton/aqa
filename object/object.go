@@ -14,6 +14,7 @@ type Type string
 // Definition of object types.
 const (
 	INTEGER_OBJ  = "INTEGER"
+	FLOAT_OBJ    = "FLOAT"
 	BOOLEAN_OBJ  = "BOOLEAN"
 	FUNCTION_OBJ = "FUNCTION"
 	STRING_OBJ   = "STRING"
@@ -48,6 +49,14 @@ type Integer struct {
 
 func (i *Integer) Type() Type      { return INTEGER_OBJ }
 func (i *Integer) Inspect() string { return fmt.Sprintf("%d", i.Value) }
+
+// Float represents an Float within the program.
+type Float struct {
+	Value float64
+}
+
+func (f *Float) Type() Type      { return FLOAT_OBJ }
+func (f *Float) Inspect() string { return fmt.Sprintf("%f", f.Value) }
 
 // Boolean represents a boolean value, such as true or false, within the program.
 type Boolean struct {

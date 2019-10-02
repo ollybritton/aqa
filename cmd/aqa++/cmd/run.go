@@ -37,12 +37,7 @@ For now, it will also print the result of the evaluation.`,
 			return
 		}
 
-		evaluated := evaluator.Eval(program, object.NewEnvironment())
-		if evaluated != nil {
-			fmt.Println(
-				au.Green(evaluated.Inspect()),
-			)
-		}
+		evaluator.Eval(program, object.NewEnvironment())
 	},
 }
 

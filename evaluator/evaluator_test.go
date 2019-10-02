@@ -1,7 +1,10 @@
 package evaluator
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/spf13/cast"
 
 	"github.com/ollybritton/aqa/lexer"
 	"github.com/ollybritton/aqa/object"
@@ -32,7 +35,27 @@ func TestEvalIntegerExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		testNumericObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestEvalFloatExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{"5.5", 5.5},
+		{"10.3", 10.3},
+		{"-5.4", -5.4},
+		{"-10.1", -10.1},
+		{"5.1 + 5.1 + 5.1 + 5.1 - 10.1", 10.3},
+		{"2.1 * 2", 4.2},
+		{"((5.1 + 10.1 * 2.1 + 15.1) / 41.41) * 2.1 + -10.1", -8},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testFloatObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -464,6 +487,32 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 	}
 
 	return true
+}
+
+func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
+	result, ok := obj.(*object.Float)
+	if !ok {
+		t.Errorf("object is not Float. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	if fmt.Sprintf("%f", result.Value) != fmt.Sprintf("%f", expected) {
+		t.Errorf("object has wrong value. got=%f, want=%f", result.Value, expected)
+		return false
+	}
+
+	return true
+}
+
+func testNumericObject(t *testing.T, obj object.Object, expected interface{}) bool {
+	switch obj.(type) {
+	case *object.Integer:
+		return testIntegerObject(t, obj, cast.ToInt64(expected))
+	case *object.Float:
+		return testFloatObject(t, obj, cast.ToFloat64(expected))
+	}
+
+	return false
 }
 
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {

@@ -1,5 +1,7 @@
 package lexer
 
+import "strings"
+
 // isLetter returns true if the given character (byte) is a letter.
 func isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z'
@@ -8,6 +10,12 @@ func isLetter(ch byte) bool {
 // isDigit returns true if the character is a number.
 func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
+}
+
+// isHexidecimal returns true if the characters is any character a...f.
+func isHexidecimal(ch byte) bool {
+	lower := strings.ToLower(string(ch))[0]
+	return 'a' <= lower && lower <= 'f'
 }
 
 // isWhitespace returns true if the character is a type of whitespace (a space, a tab or a linefeed)

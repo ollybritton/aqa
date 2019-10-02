@@ -99,15 +99,42 @@ func (l *Lexer) readIdentifier() string {
 }
 
 // readNumber reads a set of digits and returns a number as a string.
-func (l *Lexer) readNumber() string {
+// It accepts int, floats, hexidecimal numbers (0xfff) and binary numbers (0b01010)\
+func (l *Lexer) readNumber() (string, token.Type) {
 	l.startPosition = l.curLinePosition
 	start := l.position
 
-	for isDigit(l.ch) {
-		l.readChar()
+	numtype := "integer"
+	eoi := false
+
+	for !eoi {
+		switch {
+		case isDigit(l.ch):
+			l.readChar()
+		case isHexidecimal(l.ch) && numtype == "hexidecimal":
+			l.readChar()
+		case l.ch == 'x':
+			numtype = "hexidecimal"
+			l.readChar()
+		case l.ch == 'b':
+			numtype = "binary"
+			l.readChar()
+		case l.ch == '.':
+			numtype = "float"
+			l.readChar()
+		default:
+			eoi = true
+
+		}
 	}
 
-	return l.input[start:l.position]
+	switch numtype {
+	case "integer", "hexidecimal", "binary":
+		return l.input[start:l.position], token.INT
+	default:
+		return l.input[start:l.position], token.FLOAT
+	}
+
 }
 
 // readString will read a string. A string is a set of characters surrounded by either a `'` or `"`
@@ -265,10 +292,12 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Column = l.startPosition
 			return tok
 		} else if isDigit(l.ch) {
-			tok.Literal = l.readNumber()
-			tok.Type = token.INT
+			literal, t := l.readNumber()
+			tok.Literal = literal
+			tok.Type = t
 			tok.Line = l.curLine
 			tok.Column = l.startPosition
+
 			return tok
 		}
 

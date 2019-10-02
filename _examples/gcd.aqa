@@ -2,7 +2,7 @@
 # Calculates the GCD of two numbers
 
 SUBROUTINE mod(a, b)
-    floor <- a / b
+    floor <- FLOOR(a / b)
     result <-  a - (floor * b)
 
     return result

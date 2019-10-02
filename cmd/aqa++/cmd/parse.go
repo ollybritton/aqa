@@ -70,7 +70,10 @@ func checkErrors(p *parser.Parser) bool {
 		fmt.Printf("%v: %v\n", errorType, au.Green(e.Error()))
 	}
 
-	fmt.Println("")
+	if len(p.Errors()) > 0 {
+		fmt.Println("")
+	}
+
 	return did
 }
 

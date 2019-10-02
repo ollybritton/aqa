@@ -1,15 +1,36 @@
 # AQA++
-![Example program, calculates the GCD of two numbers](_media/gcd.png)
-
 `AQA++` is an **unofficial** implementation of the [AQA psuedocode specification](https://filestore.aqa.org.uk/resources/computing/AQA-8520-TG-PC.PDF) in Go. It also supports some features that aren't in the spec (such as maps) in order to make it slightly more usable, hence the `++` in the name. It is interpreted and the design of the interpreter is based on the one described in the book [Writing An Interpreter in Go](https://interpreterbook.com/).
 
-It is interpreted diffentely to most production-ready languages, as there is no intermediate step of generating something like bytecode or instructions for a virtual machine.
+![Example program, calculates the GCD of two numbers](_media/gcd.png)
 
 ## Demo
 For now, if you want to try it out, you can go to [https://aqa.ollybr.repl.run/](https://aqa.ollybr.repl.run/) for a REPL and [https://repl.it/@ollybr/AQA](https://repl.it/@ollybr/AQA) if you want to write a file. Both of those are just REPL.ITs that download the executable from my website and run it.
 
-## Bugs
-See [BUGS](./BUGS.md)
+## Syntax
+### Specification
+Everything in the AQA specification except for:
+* Constants: `constant a <- 10`
+* Arrays: `a <- [1,2,3,4,5]`
+* `>=` and `<=`.
+* Some builtin functions.
 
-## Design
-See [DESIGN](./DESIGN.md)
+*(I'm still planning on adding these)*
+
+### Additions
+Additions to the spec (hence to `++`)
+* NO UPPERCASE REQUIREMENTS SO THINGS DON'T NEED TO BE SCREAMED
+* Use of `0x123edf` syntax to define hexadecimal numbers
+* Use of `0b100000` syntax to define binary numbers
+
+Also, it **WILL* support the following (to be added)
+* Maps: using the `{` syntax `}`
+* `FN`: similar to a subroutine, but an expression. This means `FN`s will be able to be passed around as arguments.
+* Bitshifts using `>>` and `<<`
+
+## Bugs
+- [ ] A block for a SUBROUTINE can be ended by a ENDIF and vice versa
+- [ ] Idents with numbers do not parse
+- [ ] `>=` and `<=` do not parse
+- [ ] Blocks such as the ones on for/while loops do not create sepearate environments
+
+Everything not yet in the language but in the spec is also considered a bug.
