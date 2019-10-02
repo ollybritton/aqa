@@ -1,4 +1,27 @@
-# Test
-# Test again
+# The Euclidean Algorithm
+# Example Program
 
-OUTPUT userinput
+SUBROUTINE mod(a, b)
+    OUTPUT "a " + INT_TO_STRING(a)
+    OUTPUT "b " + INT_TO_STRING(b)
+
+    floor <- a / b
+    result <-  a - (floor * b)
+
+    OUTPUT "result: " + INT_TO_STRING(result)
+    return result
+ENDSUBROUTINE
+
+SUBROUTINE gcd(a, b)
+    IF a == 0 THEN
+        return b
+    ENDIF
+
+    IF b == 0 THEN
+        return a
+    ENDIF
+
+    return gcd(b, mod(a, b))
+ENDSUBROUTINE
+
+gcd(285, 741)

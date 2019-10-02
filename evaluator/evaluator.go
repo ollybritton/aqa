@@ -337,9 +337,20 @@ func evalWhileStatement(node *ast.WhileStatement, env *object.Environment) objec
 
 func evalForStatement(node *ast.ForStatement, env *object.Environment) object.Object {
 	extended := object.NewEnclosedEnvironment(env)
+
+	lower, ok := Eval(node.Lower, env).(*object.Integer)
+	if !ok {
+		return newError("expected integer expression for `for` loop lower bound, got=%T", node.Lower)
+	}
+
+	upper, ok := Eval(node.Upper, env).(*object.Integer)
+	if !ok {
+		return newError("expected integer expression for `for` loop upper bounds, got=%T", node.Upper)
+	}
+
 	var val object.Object
 
-	for i := node.Lower.Value; i <= node.Upper.Value; i++ {
+	for i := lower.Value; i <= upper.Value; i++ {
 		extended.Set(node.Ident.Value, &object.Integer{Value: i})
 		val = Eval(node.Body, extended)
 

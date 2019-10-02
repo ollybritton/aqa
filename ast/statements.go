@@ -232,8 +232,8 @@ type ForStatement struct {
 	Tok token.Token // the token.FOR statement.
 
 	Ident *Identifier
-	Lower *IntegerLiteral
-	Upper *IntegerLiteral
+	Lower Expression
+	Upper Expression
 	Body  *BlockStatement
 }
 

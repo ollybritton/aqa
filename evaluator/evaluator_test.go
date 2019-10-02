@@ -179,7 +179,9 @@ return a`
 
 	evaluated := testEval(t, input)
 	if returnVal, ok := evaluated.(*object.ReturnValue); ok {
-		testIntegerObject(t, returnVal.Value, 55)
+		if val, ok := returnVal.Value.(*object.Integer); ok {
+			testIntegerObject(t, val, 55)
+		}
 	}
 }
 

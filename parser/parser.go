@@ -474,11 +474,7 @@ func (p *Parser) parseForStatement() *ast.ForStatement {
 	}
 	p.nextToken()
 
-	lower, ok := p.parseIntegerLiteral().(*ast.IntegerLiteral)
-	if !ok {
-		p.addError(NewUnexpectedTokenError(p.curToken, p.peekToken, token.INT))
-		return &ast.ForStatement{}
-	}
+	lower := p.parseExpression(LOWEST)
 
 	if !p.expectPeek(token.TO) {
 		p.addError(NewInvalidTokenError(p.curToken, p.peekToken, p.curToken))
@@ -486,11 +482,7 @@ func (p *Parser) parseForStatement() *ast.ForStatement {
 	}
 	p.nextToken()
 
-	upper, ok := p.parseIntegerLiteral().(*ast.IntegerLiteral)
-	if !ok {
-		p.addError(NewUnexpectedTokenError(p.curToken, p.peekToken, token.INT))
-		return &ast.ForStatement{}
-	}
+	upper := p.parseExpression(LOWEST)
 
 	stmt.Lower = lower
 	stmt.Upper = upper

@@ -308,7 +308,7 @@ UNTIL a == 10`
 
 }
 func TestForStatement(t *testing.T) {
-	input := `FOR i <- 10 TO 20
+	input := `FOR i <- (9+1) TO 5*4
   a <- a + 1
 ENDFOR`
 
@@ -326,12 +326,12 @@ ENDFOR`
 		t.Fatalf("incorrect for loop variable. got=%s, want=%s", stmt.Ident.Value, "i")
 	}
 
-	if stmt.Lower.Value != 10 {
-		t.Fatalf("incorrect for loop lower bound. got=%d, want=%d", stmt.Lower.Value, 10)
+	if stmt.Lower.String() != "(9 + 1)" {
+		t.Fatalf("incorrect for loop lower bound. got=%s, want=%s", stmt.Lower.String(), "(9 + 1)")
 	}
 
-	if stmt.Upper.Value != 20 {
-		t.Fatalf("incorrect for loop upper bound. got=%d, want=%d", stmt.Upper.Value, 10)
+	if stmt.Upper.String() != "(5 * 4)" {
+		t.Fatalf("incorrect for loop upper bound. got=%s, want=%s", stmt.Upper.String(), "(5 * 4)")
 	}
 
 	if len(stmt.Body.Statements) != 1 {
