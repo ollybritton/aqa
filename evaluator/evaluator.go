@@ -2,13 +2,20 @@ package evaluator
 
 import (
 	"bufio"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ollybritton/aqa/ast"
+	"github.com/ollybritton/aqa/evaluator/builtins"
 	"github.com/ollybritton/aqa/object"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 // Eval evaluates a node, and returns its representation as an object.Object.
 func Eval(node ast.Node, env *object.Environment) object.Object {
@@ -358,7 +365,7 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 		return val
 	}
 
-	if builtin, ok := builtins[node.Value]; ok {
+	if builtin, ok := builtins.Builtins[strings.ToUpper(node.Value)]; ok {
 		return builtin
 	}
 

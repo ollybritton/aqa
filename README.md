@@ -12,7 +12,7 @@ Everything in the AQA specification except for:
 * Constants: `constant a <- 10`
 * Arrays: `a <- [1,2,3,4,5]`
 * `>=` and `<=`.
-* Some builtin functions.
+* Some builtin functions/operators, like `MOD` or `DIV`.
 
 *(I'm still planning on adding these)*
 
@@ -21,6 +21,7 @@ Additions to the spec (hence to `++`)
 * NO UPPERCASE REQUIREMENTS SO THINGS DON'T NEED TO BE SCREAMED
 * Use of `0x123edf` syntax to define hexadecimal numbers
 * Use of `0b100000` syntax to define binary numbers
+* More builtin functions, such as SQRT and FLOOR.
 
 Also, it **WILL* support the following (to be added)
 * Maps: using the `{` syntax `}`
@@ -32,5 +33,6 @@ Also, it **WILL* support the following (to be added)
 - [ ] Idents with numbers do not parse
 - [ ] `>=` and `<=` do not parse
 - [ ] Blocks such as the ones on for/while loops do not create sepearate environments
+- [ ] Builtins are not yet tested properly
 
 Everything not yet in the language but in the spec is also considered a bug.

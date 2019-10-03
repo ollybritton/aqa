@@ -1,0 +1,2 @@
+a <- INPUT("What is your name? ")
+PRINT("Hello", a)
