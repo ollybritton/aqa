@@ -155,3 +155,48 @@ func (sl *StringLiteral) String() string {
 
 	return out.String()
 }
+
+// ArrayLiteral represents an array inside the AST.
+type ArrayLiteral struct {
+	Tok      token.Token // the '[' token
+	Elements []Expression
+}
+
+func (al *ArrayLiteral) expressionNode()    {}
+func (al *ArrayLiteral) Token() token.Token { return al.Tok }
+func (al *ArrayLiteral) String() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, el := range al.Elements {
+		elements = append(elements, el.String())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+// IndexExpression represents an access to an array or map within the AST.
+type IndexExpression struct {
+	Tok   token.Token // The [ token
+	Left  Expression
+	Index Expression
+}
+
+func (ie *IndexExpression) expressionNode()    {}
+func (ie *IndexExpression) Token() token.Token { return ie.Tok }
+func (ie *IndexExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString("[")
+	out.WriteString(ie.Index.String())
+	out.WriteString("]")
+	out.WriteString(")")
+
+	return out.String()
+}

@@ -35,7 +35,8 @@ ENDFOR
 OUTPUT USERINPUT
 1.234
 0xBADA55
-0b10`
+0b10
+[1, 2]`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -129,7 +130,14 @@ OUTPUT USERINPUT
 		{Type: token.NEWLINE, Literal: "\n", Line: 26, Column: 8},
 		{Type: token.INT, Literal: "0b10", Line: 27, Column: 0},
 
-		{Type: token.EOF, Literal: "", Line: 27, Column: 3},
+		{Type: token.NEWLINE, Literal: "\n", Line: 27, Column: 4},
+		{Type: token.LBRACKET, Literal: "\n", Line: 28, Column: 0},
+		{Type: token.INT, Literal: "1", Line: 28, Column: 1},
+		{Type: token.COMMA, Literal: ",", Line: 28, Column: 2},
+		{Type: token.INT, Literal: "2", Line: 28, Column: 4},
+		{Type: token.LBRACKET, Literal: "]", Line: 28, Column: 5},
+
+		{Type: token.EOF, Literal: "", Line: 28, Column: 5},
 	}
 
 	l := New(input)

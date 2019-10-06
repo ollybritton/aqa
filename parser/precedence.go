@@ -12,6 +12,7 @@ const (
 	PRODUCT     // * or /
 	PREFIX      // -X or !X
 	CALL        // fn(x)
+	INDEX       // array[index
 )
 
 // Mappings of precedences to their token types.
@@ -25,4 +26,5 @@ var precedences = map[token.Type]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.LPAREN:   CALL,
+	token.LBRACKET: INDEX,
 }

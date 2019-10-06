@@ -21,6 +21,8 @@ func init() {
 	Builtins["LEN"] = &object.Builtin{Fn: BuiltinLen}
 	Builtins["POSITION"] = &object.Builtin{Fn: BuiltinPosition}
 	Builtins["SUBSTRING"] = &object.Builtin{Fn: BuiltinSubstring}
+	Builtins["SLICE"] = &object.Builtin{Fn: BuiltinSlice}
+	Builtins["SUM"] = &object.Builtin{Fn: BuiltinSum}
 
 	Builtins["STRING_TO_INT"] = &object.Builtin{Fn: BuiltinStringToInt}
 	Builtins["INT_TO_STRING"] = &object.Builtin{Fn: BuiltinIntToString}

@@ -1,0 +1,115 @@
+#################################################################
+## Iro
+################################################################ 
+##
+## * Press Ctrl + '+'/'-' To Zoom in
+## * Press Ctrl + S to save and recalculate... 
+## * Documents are saved to web storage.
+## * Only one save slot supported.
+## * Matches cannot span lines.
+## * Unicode chars must be defined in \u0000 to \uffff format.
+## * All matches must be contained by a single group ( ... )
+## * Look behinds not permitted, (?<= or (?<!
+## * Look forwards are permitted (?= or (?!
+## * Constants are defined as __my_const = (......)
+## * The \= format allows unescaped regular expressions
+## * Constants referenced by match \= $${__my_const}
+## * Constants can reference other constants
+## * You are free to delete all the default scopes.
+## * Twitter : ainslec , Web: http://eeyo.io/iro
+##
+################################################################
+
+name                   = aqa
+file_extensions []     = aqa;
+
+
+################################################################
+## Styles
+################################################################
+
+styles [] {
+   .keyword : style {
+      color = yellow
+   }
+   
+   .builtin : style {
+      color = light_blue
+   }
+   
+   .punctuation : style { 
+      color = violet
+   }
+   
+   .string : style {
+      color = violet
+   }
+   
+   .comment : style {
+      color = grey
+   }
+   
+   .ident : style {
+      color =  orange
+   } 
+} 
+
+#################################################
+## Contexts
+#################################################
+
+contexts [] {
+   main : context {
+      # Keywords
+      : pattern {
+         regex \= (SUBROUTINE|ENDSUBROUTINE|IF|ENDIF|ELSE|RETURN|WHILE|ENDWHILE|REPEAT|UNTIL|FOR|ENDFOR|TO|THEN)
+         styles[] = .keyword;
+      }
+      
+      : pattern {
+         regex \= (CONSTANT|TRUE|FALSE|TO)
+         styles[] = .keyword;
+      }
+      
+      : pattern {
+         regex \= (subroutine|endsubroutine|if|endif|else|return|while|endwhile|repeat|until|for|endfor|to|then)
+         styles[] = .keyword;
+      }
+      
+      : pattern {
+         regex \= (constant|true|false|to)
+         styles[] = .keyword;
+      }
+      
+      # Builtins
+      : pattern {
+         regex \= (USERINPUT|OUTPUT)
+         styles[] = .builtin;
+      }
+      
+      # Operators
+      : pattern {
+         regex \= (\+|-|/|\*|,|!|<|>|==|!=|<-)
+         styles[] = .punctuation;
+      }
+      
+      
+      # Comments
+      : pattern {
+         regex \= (#.*)
+         styles[] = .comment;
+      }
+      
+      # Strings
+      : inline_push {
+         regex \= ("|')
+         styles[] = .string;
+         default_style = .string
+         
+         : pop {
+            regex \= ("|')
+            styles[] = .string;
+         }
+      }
+   }
+}

@@ -18,6 +18,7 @@ const (
 	BOOLEAN_OBJ  = "BOOLEAN"
 	FUNCTION_OBJ = "FUNCTION"
 	STRING_OBJ   = "STRING"
+	ARRAY_OBJ    = "ARRAY"
 
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	BUILTIN_OBJ      = "BUILTIN"
@@ -128,3 +129,24 @@ type String struct {
 
 func (s *String) Type() Type      { return STRING_OBJ }
 func (s *String) Inspect() string { return s.Value }
+
+// Array represents an arrau within the evaluator.
+type Array struct {
+	Elements []Object
+}
+
+func (a *Array) Type() Type { return ARRAY_OBJ }
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}

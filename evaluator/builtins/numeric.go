@@ -74,3 +74,43 @@ func BuiltinSqrt(args ...object.Object) object.Object {
 		return newError("argument to `FLOOR` not supported, got=%s", args[0].Type())
 	}
 }
+
+// BuiltinSum will sum all the items in an array.
+func BuiltinSum(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return BuiltinSum(&object.Array{Elements: args})
+	}
+
+	val, ok := args[0].(*object.Array)
+	if !ok {
+		return newError("argument to `SUM` not supported, got=%s", args[0].Type())
+	}
+
+	var totalInt int64
+	var totalFloat float64
+
+	for _, e := range val.Elements {
+		switch e := e.(type) {
+		case *object.Integer:
+			totalInt += e.Value
+		case *object.Float:
+			totalFloat += e.Value
+		default:
+			return newError("array value '%v' is not a float or integer in call to `SUM`, got=%s", e.Inspect(), e.Type())
+		}
+	}
+
+	if totalFloat > 0 && totalInt > 0 {
+		return &object.Float{Value: totalFloat + float64(totalInt)}
+	}
+
+	if totalFloat != 0 {
+		return &object.Float{Value: totalFloat}
+	}
+
+	if totalInt != 0 {
+		return &object.Integer{Value: totalInt}
+	}
+
+	return &object.Float{Value: 0.0}
+}
