@@ -11,9 +11,10 @@ const (
 	LESSGREATER // > or <
 	SUM         // + or -
 	PRODUCT     // * or /
-	PREFIX      // -X or !X
-	CALL        // fn(x)
-	INDEX       // array[index
+	DIVMOD
+	PREFIX // -X or !X
+	CALL   // fn(x)
+	INDEX  // array[index
 )
 
 // Mappings of precedences to their token types.
@@ -30,6 +31,8 @@ var precedences = map[token.Type]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
+	token.DIV:      DIVMOD,
+	token.MOD:      DIVMOD,
 	token.LPAREN:   CALL,
 	token.LBRACKET: INDEX,
 }

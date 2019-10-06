@@ -1,18 +1,18 @@
 # Numbers
-# AQA++ supports integers and real numbers. Integers can be given as hexidecimal or binary.
+# AQA++ supports integers and floating-point numbers. Integers can be given as hexidecimal or binary.
 
-i <- 10
-OUTPUT i
+int <- 10
+OUTPUT int
 # Outputs 10
 
-h <- 0x10
-OUTPUT h
+hex <- 0x10
+OUTPUT hex
 # Outputs 16
 
-b <- 0b101010
-OUTPUT b
+bin <- 0b101010
+OUTPUT bin
 # Outputs 42
 
-f <- 0.11234
-OUTPUT f
+float <- 0.11234
+OUTPUT float
 # Outputs 0.112340 

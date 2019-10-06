@@ -10,9 +10,8 @@ For now, if you want to try it out, you can go to [https://aqa.ollybr.repl.run/]
 ### Specification
 Everything in the AQA specification except for:
 * Constants: `constant a <- 10`
-* Some builtin functions/operators, like `MOD` or `DIV`.
 
-*(I'm still planning on adding these)*
+*(I'm still planning on adding this)*
 
 ### Additions
 Additions to the spec (hence to `++`)
@@ -32,5 +31,6 @@ Also, it **WILL* support the following (to be added)
 - [ ] Blocks such as the ones on for/while loops do not create sepearate environments
 - [ ] Builtins are not yet tested properly
 - [ ] You can currently overwrite builtins like `LEN <- 10`, `LEN([])` makes error `ERROR: not a subroutine, function or builtin: INTEGER`.
+- [ ] Lack of support for unicode
 
 Everything not yet in the language but in the spec is also considered a bug.

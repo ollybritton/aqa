@@ -40,7 +40,9 @@ OUTPUT USERINPUT
 1<=2
 1>=2
 1>>2
-2<<1`
+2<<1
+1 MOD 2
+2 DIV 3`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -161,7 +163,17 @@ OUTPUT USERINPUT
 		{Type: token.LSHIFT, Literal: "<<", Line: 32, Column: 1},
 		{Type: token.INT, Literal: "1", Line: 32, Column: 3},
 
-		{Type: token.EOF, Literal: "", Line: 32, Column: 3},
+		{Type: token.NEWLINE, Literal: "\n", Line: 32, Column: 4},
+		{Type: token.INT, Literal: "1", Line: 33, Column: 0},
+		{Type: token.MOD, Literal: "MOD", Line: 33, Column: 2},
+		{Type: token.INT, Literal: "2", Line: 33, Column: 6},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 33, Column: 7},
+		{Type: token.INT, Literal: "2", Line: 34, Column: 0},
+		{Type: token.DIV, Literal: "DIV", Line: 34, Column: 2},
+		{Type: token.INT, Literal: "3", Line: 34, Column: 6},
+
+		{Type: token.EOF, Literal: "", Line: 34, Column: 6},
 	}
 
 	l := New(input)

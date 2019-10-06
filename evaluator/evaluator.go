@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"bufio"
+	"math"
 	"math/rand"
 	"os"
 	"strconv"
@@ -270,6 +271,16 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 	case "<<":
 		return &object.Integer{Value: leftInt.Value << rightInt.Value}
 
+	case "DIV":
+		return &object.Integer{Value: int64(
+			math.Floor(float64(leftInt.Value / rightInt.Value)),
+		)}
+
+	case "MOD":
+		return &object.Integer{Value: int64(
+			leftInt.Value % rightInt.Value,
+		)}
+
 	case "==":
 		return nativeBoolToBooleanObject(leftInt.Value == rightInt.Value)
 	case "!=":
@@ -301,6 +312,11 @@ func evalFloatInfixExpression(left object.Object, operator string, right object.
 		return &object.Float{Value: lf.Value * rf.Value}
 	case "/":
 		return &object.Float{Value: lf.Value / rf.Value}
+
+	case "DIV":
+		return &object.Integer{Value: int64(
+			math.Floor(lf.Value / rf.Value),
+		)}
 
 	case "==":
 		return nativeBoolToBooleanObject(lf.Value == rf.Value)

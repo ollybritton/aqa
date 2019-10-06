@@ -6,6 +6,7 @@ import (
 
 	"github.com/ollybritton/aqa/object"
 
+	"github.com/logrusorgru/aurora"
 	au "github.com/logrusorgru/aurora"
 	"github.com/ollybritton/aqa/evaluator"
 	"github.com/ollybritton/aqa/lexer"
@@ -37,7 +38,14 @@ For now, it will also print the result of the evaluation.`,
 			return
 		}
 
-		evaluator.Eval(program, object.NewEnvironment())
+		eval := evaluator.Eval(program, object.NewEnvironment())
+		if eval == nil {
+			return
+		}
+
+		if eval.Type() == object.ERROR_OBJ {
+			fmt.Println(aurora.Red(eval.Inspect()).Bold())
+		}
 	},
 }
 

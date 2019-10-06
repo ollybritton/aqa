@@ -1,2 +1,9 @@
-a <- INPUT("What is your name? ")
-PRINT("Hello", a)
+# User Input Example
+# AQA++ supports input through the `USERINPUT` keyword and the `INPUT` function.
+# AQA++ also supports output through the `OUTPUT` keyword and the `PRINT` function.
+
+OUTPUT "Welcome to the cost calculator:"
+amount <- INPUT("How many bananas would you like to buy? ")
+cost <- INPUT("At what cost? ")
+
+PRINT("That will cost you", cost*amount, "pounds")

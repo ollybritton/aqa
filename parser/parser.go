@@ -63,6 +63,8 @@ func New(l *lexer.Lexer) *Parser {
 		token.GT_EQ:  p.parseInfixExpression,
 		token.LSHIFT: p.parseInfixExpression,
 		token.RSHIFT: p.parseInfixExpression,
+		token.DIV:    p.parseInfixExpression,
+		token.MOD:    p.parseInfixExpression,
 
 		token.LPAREN:   p.parseCallExpression,
 		token.LBRACKET: p.parseIndexExpression,

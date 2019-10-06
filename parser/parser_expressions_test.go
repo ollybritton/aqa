@@ -158,6 +158,8 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"5 << 5", 5, "<<", 5},
 		{"5 == 5", 5, "==", 5},
 		{"5 != 5", 5, "!=", 5},
+		{"5 DIV 5", 5, "DIV", 5},
+		{"5 MOD 5", 5, "MOD", 5},
 		{"true == true", true, "==", true},
 		{"true != false", true, "!=", false},
 		{"false == false", false, "==", false},

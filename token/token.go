@@ -43,6 +43,8 @@ const (
 	BANG     = "!"
 	ASTERISK = "*"
 	SLASH    = "/"
+	MOD      = "MOD"
+	DIV      = "DIV"
 	LSHIFT   = "<<"
 	RSHIFT   = ">>"
 
@@ -127,6 +129,9 @@ var Keywords = map[string]Type{
 
 	"output":    OUTPUT,
 	"userinput": USERINPUT,
+
+	"div": DIV,
+	"mod": MOD,
 }
 
 // LookupKeyword converts a keyword name into a keyword.
