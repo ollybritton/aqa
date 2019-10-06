@@ -6,12 +6,11 @@
 ## Demo
 For now, if you want to try it out, you can go to [https://aqa.ollybr.repl.run/](https://aqa.ollybr.repl.run/) for a REPL and [https://repl.it/@ollybr/AQA](https://repl.it/@ollybr/AQA) if you want to write a file. Both of those are just REPL.ITs that download the executable from my website and run it.
 
+For more examples, see the [_examples folder](_examples/).
+
 ## Syntax
 ### Specification
-Everything in the AQA specification except for:
-* Constants: `constant a <- 10`
-
-*(I'm still planning on adding this)*
+Everything in the AQA specification.
 
 ### Additions
 Additions to the spec (hence to `++`)
@@ -32,5 +31,3 @@ Also, it **WILL* support the following (to be added)
 - [ ] Builtins are not yet tested properly
 - [ ] You can currently overwrite builtins like `LEN <- 10`, `LEN([])` makes error `ERROR: not a subroutine, function or builtin: INTEGER`.
 - [ ] Lack of support for unicode
-
-Everything not yet in the language but in the spec is also considered a bug.
