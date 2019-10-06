@@ -43,9 +43,13 @@ const (
 	BANG     = "!"
 	ASTERISK = "*"
 	SLASH    = "/"
+	LSHIFT   = "<<"
+	RSHIFT   = ">>"
 
 	LT     = "<"
 	GT     = ">"
+	LT_EQ  = "<="
+	GT_EQ  = ">="
 	EQ     = "=="
 	NOT_EQ = "!="
 

@@ -189,8 +189,6 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newSingleToken(token.ASTERISK)
 	case '/':
 		tok = l.newSingleToken(token.SLASH)
-	case '>':
-		tok = l.newSingleToken(token.GT)
 	case ',':
 		tok = l.newSingleToken(token.COMMA)
 	case '(':
@@ -220,7 +218,8 @@ func (l *Lexer) NextToken() token.Token {
 			}
 		} else {
 			// Assignment is handled using <- in AQA++
-			tok = l.newSingleToken(token.ILLEGAL)
+			// Also allow = for equality.
+			tok = l.newSingleToken(token.EQ)
 		}
 
 	case '!': // ! or !=
@@ -238,7 +237,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok = l.newSingleToken(token.BANG)
 		}
 
-	case '<': // < or <-
+	case '<': // < or <- or <= or <<
 		if l.peekChar() == '-' {
 			prev := l.ch
 			l.readChar()
@@ -249,8 +248,53 @@ func (l *Lexer) NextToken() token.Token {
 				Line:    l.curLine,
 				Column:  l.curLinePosition - 1,
 			}
+		} else if l.peekChar() == '=' {
+			prev := l.ch
+			l.readChar()
+
+			tok = token.Token{
+				Type:    token.LT_EQ,
+				Literal: string(prev) + string(l.ch),
+				Line:    l.curLine,
+				Column:  l.curLinePosition - 1,
+			}
+		} else if l.peekChar() == '<' {
+			prev := l.ch
+			l.readChar()
+
+			tok = token.Token{
+				Type:    token.LSHIFT,
+				Literal: string(prev) + string(l.ch),
+				Line:    l.curLine,
+				Column:  l.curLinePosition - 1,
+			}
 		} else {
 			tok = l.newSingleToken(token.LT)
+		}
+
+	case '>': // > or >= or >>
+		if l.peekChar() == '=' {
+			prev := l.ch
+			l.readChar()
+
+			tok = token.Token{
+				Type:    token.GT_EQ,
+				Literal: string(prev) + string(l.ch),
+				Line:    l.curLine,
+				Column:  l.curLinePosition - 1,
+			}
+		} else if l.peekChar() == '>' {
+			prev := l.ch
+			l.readChar()
+
+			tok = token.Token{
+				Type:    token.RSHIFT,
+				Literal: string(prev) + string(l.ch),
+				Line:    l.curLine,
+				Column:  l.curLinePosition - 1,
+			}
+		} else {
+			tok = l.newSingleToken(token.GT)
 		}
 
 	// String handling

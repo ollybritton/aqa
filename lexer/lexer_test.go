@@ -36,7 +36,11 @@ OUTPUT USERINPUT
 1.234
 0xBADA55
 0b10
-[1, 2]`
+[1, 2]
+1<=2
+1>=2
+1>>2
+2<<1`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -56,7 +60,7 @@ OUTPUT USERINPUT
 		{Type: token.NEWLINE, Literal: "\n", Line: 2, Column: 6},
 		{Type: token.NOT_EQ, Literal: "!=", Line: 3, Column: 0},
 		{Type: token.EQ, Literal: "==", Line: 3, Column: 3},
-		{Type: token.ILLEGAL, Literal: "=", Line: 3, Column: 6},
+		{Type: token.EQ, Literal: "=", Line: 3, Column: 6},
 		{Type: token.ILLEGAL, Literal: "@", Line: 3, Column: 8},
 		{Type: token.NEWLINE, Literal: "\n", Line: 3, Column: 9},
 		{Type: token.INT, Literal: "5", Line: 4, Column: 0},
@@ -131,13 +135,33 @@ OUTPUT USERINPUT
 		{Type: token.INT, Literal: "0b10", Line: 27, Column: 0},
 
 		{Type: token.NEWLINE, Literal: "\n", Line: 27, Column: 4},
-		{Type: token.LBRACKET, Literal: "\n", Line: 28, Column: 0},
+		{Type: token.LBRACKET, Literal: "[", Line: 28, Column: 0},
 		{Type: token.INT, Literal: "1", Line: 28, Column: 1},
 		{Type: token.COMMA, Literal: ",", Line: 28, Column: 2},
 		{Type: token.INT, Literal: "2", Line: 28, Column: 4},
-		{Type: token.LBRACKET, Literal: "]", Line: 28, Column: 5},
+		{Type: token.RBRACKET, Literal: "]", Line: 28, Column: 5},
 
-		{Type: token.EOF, Literal: "", Line: 28, Column: 5},
+		{Type: token.NEWLINE, Literal: "\n", Line: 28, Column: 6},
+		{Type: token.INT, Literal: "1", Line: 29, Column: 0},
+		{Type: token.LT_EQ, Literal: "<=", Line: 29, Column: 1},
+		{Type: token.INT, Literal: "2", Line: 29, Column: 3},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 29, Column: 4},
+		{Type: token.INT, Literal: "1", Line: 30, Column: 0},
+		{Type: token.GT_EQ, Literal: ">=", Line: 30, Column: 1},
+		{Type: token.INT, Literal: "2", Line: 30, Column: 3},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 30, Column: 4},
+		{Type: token.INT, Literal: "1", Line: 31, Column: 0},
+		{Type: token.RSHIFT, Literal: ">>", Line: 31, Column: 1},
+		{Type: token.INT, Literal: "2", Line: 31, Column: 3},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 31, Column: 4},
+		{Type: token.INT, Literal: "2", Line: 32, Column: 0},
+		{Type: token.LSHIFT, Literal: "<<", Line: 32, Column: 1},
+		{Type: token.INT, Literal: "1", Line: 32, Column: 3},
+
+		{Type: token.EOF, Literal: "", Line: 32, Column: 3},
 	}
 
 	l := New(input)

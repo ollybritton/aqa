@@ -10,8 +10,6 @@ For now, if you want to try it out, you can go to [https://aqa.ollybr.repl.run/]
 ### Specification
 Everything in the AQA specification except for:
 * Constants: `constant a <- 10`
-* Arrays: `a <- [1,2,3,4,5]`
-* `>=` and `<=`.
 * Some builtin functions/operators, like `MOD` or `DIV`.
 
 *(I'm still planning on adding these)*
@@ -22,17 +20,17 @@ Additions to the spec (hence to `++`)
 * Use of `0x123edf` syntax to define hexadecimal numbers
 * Use of `0b100000` syntax to define binary numbers
 * More builtin functions, such as SQRT and FLOOR.
+* Bitshifts using `>>` and `<<`
 
 Also, it **WILL* support the following (to be added)
 * Maps: using the `{` syntax `}`
 * `FN`: similar to a subroutine, but an expression. This means `FN`s will be able to be passed around as arguments.
-* Bitshifts using `>>` and `<<`
 
 ## Bugs
 - [ ] A block for a SUBROUTINE can be ended by a ENDIF and vice versa
 - [ ] Idents with numbers do not parse
-- [ ] `>=` and `<=` do not parse
 - [ ] Blocks such as the ones on for/while loops do not create sepearate environments
 - [ ] Builtins are not yet tested properly
+- [ ] You can currently overwrite builtins like `LEN <- 10`, `LEN([])` makes error `ERROR: not a subroutine, function or builtin: INTEGER`.
 
 Everything not yet in the language but in the spec is also considered a bug.
