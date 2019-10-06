@@ -42,7 +42,8 @@ OUTPUT USERINPUT
 1>>2
 2<<1
 1 MOD 2
-2 DIV 3`
+2 DIV 3
+NOT true OR false AND false XOR true`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -173,7 +174,17 @@ OUTPUT USERINPUT
 		{Type: token.DIV, Literal: "DIV", Line: 34, Column: 2},
 		{Type: token.INT, Literal: "3", Line: 34, Column: 6},
 
-		{Type: token.EOF, Literal: "", Line: 34, Column: 6},
+		{Type: token.NEWLINE, Literal: "\n", Line: 34, Column: 7},
+		{Type: token.NOT, Literal: "NOT", Line: 35, Column: 0},
+		{Type: token.TRUE, Literal: "true", Line: 35, Column: 4},
+		{Type: token.OR, Literal: "OR", Line: 35, Column: 9},
+		{Type: token.FALSE, Literal: "false", Line: 35, Column: 12},
+		{Type: token.AND, Literal: "AND", Line: 35, Column: 18},
+		{Type: token.FALSE, Literal: "false", Line: 35, Column: 22},
+		{Type: token.XOR, Literal: "XOR", Line: 35, Column: 28},
+		{Type: token.TRUE, Literal: "true", Line: 35, Column: 32},
+
+		{Type: token.EOF, Literal: "", Line: 35, Column: 35},
 	}
 
 	l := New(input)

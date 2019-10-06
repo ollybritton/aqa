@@ -91,6 +91,12 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"(1 < 2) == false", false},
 		{"(1 > 2) == true", false},
 		{"(1 > 2) == false", true},
+		{"true OR false", true},
+		{"true AND false", false},
+		{"true XOR false", true},
+		{"true XOR true", false},
+		{"NOT true", false},
+		{"NOT false", true},
 	}
 
 	for _, tt := range tests {
@@ -298,6 +304,11 @@ ENDIF`,
 		{
 			`"Hello" - "World"`,
 			"unknown operator: STRING - STRING",
+		},
+		{
+			`constant a <- 1
+			a <- 2`,
+			"cannot assign to constant a",
 		},
 	}
 

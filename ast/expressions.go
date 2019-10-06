@@ -12,14 +12,23 @@ import (
 // Example: `a`
 // General: `{ident}`
 type Identifier struct {
-	Tok   token.Token // the token.IDENT token.
-	Value string
+	Tok      token.Token // the token.IDENT token.
+	Constant bool
+	Value    string
 }
 
 func (i *Identifier) expressionNode()    {}
 func (i *Identifier) Token() token.Token { return i.Tok }
 func (i *Identifier) String() string {
-	return i.Value
+	var out bytes.Buffer
+
+	if i.Constant {
+		out.WriteString("constant ")
+	}
+
+	out.WriteString(i.Value)
+
+	return out.String()
 }
 
 // IntegerLiteral represents an integer value in the AST.

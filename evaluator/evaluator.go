@@ -57,14 +57,27 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 
-		env.Set(node.Name.Value, val)
+		if node.Name.Constant {
+			err := env.SetConstant(node.Name.Value, val)
+			if isError(err) {
+				return err
+			}
+		} else {
+			err := env.Set(node.Name.Value, val)
+			if isError(err) {
+				return err
+			}
+		}
 
 	case *ast.Subroutine:
 		params := node.Parameters
 		body := node.Body
 		name := node.Name
 
-		env.Set(name.Value, &object.Subroutine{Parameters: params, Env: env, Body: body, Name: name})
+		err := env.Set(name.Value, &object.Subroutine{Parameters: params, Env: env, Body: body, Name: name})
+		if isError(err) {
+			return err
+		}
 
 	case *ast.SubroutineCall:
 		ident := evalIdentifier(node.Subroutine, env)
@@ -185,7 +198,7 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 
 func evalPrefixExpression(operator string, right object.Object) object.Object {
 	switch operator {
-	case "!":
+	case "!", "NOT":
 		return evalBangOperatorExpression(right)
 	case "-":
 		return evalMinusPrefixOperatorExpression(right)
@@ -348,6 +361,13 @@ func evalBooleanInfixExpression(left object.Object, operator string, right objec
 	case "!=":
 		return nativeBoolToBooleanObject(leftVal != rightVal)
 
+	case "OR":
+		return nativeBoolToBooleanObject(leftVal || rightVal)
+	case "XOR":
+		return nativeBoolToBooleanObject((leftVal || rightVal) && !(leftVal && rightVal))
+	case "AND":
+		return nativeBoolToBooleanObject(leftVal && rightVal)
+
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
@@ -473,7 +493,11 @@ func evalForStatement(node *ast.ForStatement, env *object.Environment) object.Ob
 	var val object.Object
 
 	for i := lower.Value; i <= upper.Value; i++ {
-		extended.Set(node.Ident.Value, &object.Integer{Value: i})
+		err := extended.Set(node.Ident.Value, &object.Integer{Value: i})
+		if isError(err) {
+			return err
+		}
+
 		val = Eval(node.Body, extended)
 
 		if isError(val) {

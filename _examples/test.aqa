@@ -1,0 +1,2 @@
+a <- NOT true
+output a

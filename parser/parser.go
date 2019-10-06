@@ -41,6 +41,8 @@ func New(l *lexer.Lexer) *Parser {
 		token.BANG:  p.parsePrefixExpression,
 		token.MINUS: p.parsePrefixExpression,
 
+		token.NOT: p.parsePrefixExpression,
+
 		token.LPAREN:   p.parseGroupedExpression,
 		token.LBRACKET: p.parseArrayLiteral,
 		token.STRING:   p.parseStringLiteral,
@@ -65,6 +67,10 @@ func New(l *lexer.Lexer) *Parser {
 		token.RSHIFT: p.parseInfixExpression,
 		token.DIV:    p.parseInfixExpression,
 		token.MOD:    p.parseInfixExpression,
+
+		token.AND: p.parseInfixExpression,
+		token.OR:  p.parseInfixExpression,
+		token.XOR: p.parseInfixExpression,
 
 		token.LPAREN:   p.parseCallExpression,
 		token.LBRACKET: p.parseIndexExpression,
@@ -115,6 +121,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch {
 	case p.curToken.Type == token.IDENT && p.peekTokenIs(token.ASSIGN):
 		return p.parseVariableAssignment()
+	case p.curToken.Type == token.CONSTANT && p.peekTokenIs(token.IDENT):
+		return p.parseConstantAssignment()
 	case p.curToken.Type == token.RETURN:
 		return p.parseReturnStatement()
 	case p.curToken.Type == token.IF:
@@ -588,4 +596,13 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseConstantAssignment() *ast.VariableAssignment {
+	p.nextToken()
+
+	stmt := p.parseVariableAssignment()
+	stmt.Name.Constant = true
+
+	return stmt
 }

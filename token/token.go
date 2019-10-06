@@ -55,6 +55,11 @@ const (
 	EQ     = "=="
 	NOT_EQ = "!="
 
+	NOT = "NOT"
+	AND = "AND"
+	OR  = "OR"
+	XOR = "XOR"
+
 	// Delimeters
 	COMMA   = ","
 	NEWLINE = "\\n"
@@ -132,6 +137,11 @@ var Keywords = map[string]Type{
 
 	"div": DIV,
 	"mod": MOD,
+
+	"not": NOT,
+	"and": AND,
+	"or":  OR,
+	"xor": XOR,
 }
 
 // LookupKeyword converts a keyword name into a keyword.

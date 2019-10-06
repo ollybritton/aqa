@@ -305,6 +305,10 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"add(a * b[2], b[1], 2 * [1, 2][1])",
 			"add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
 		},
+		{
+			"NOT true OR false AND false XOR true",
+			"(NOT(((true OR false) AND false) XOR true))",
+		},
 	}
 
 	for i, tt := range tests {

@@ -9,7 +9,7 @@ import (
 
 // VariableAssignment represents the process of assignment to a variable in the AST.
 // Example: `a <- 10`.
-// General: `{ident} <- {expression}`
+// General: `?constant {ident} <- {expression}`
 type VariableAssignment struct {
 	Tok   token.Token // the token.ASSIGN token.
 	Name  *Identifier
