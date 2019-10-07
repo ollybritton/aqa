@@ -214,11 +214,9 @@ func evalBangOperatorExpression(right object.Object) object.Object {
 	case FALSE:
 		return TRUE
 	case NULL:
-		// TODO: I want to avoid null, should error here
-		return TRUE
+		return newError("unknown operator: !null")
 	default:
-		// TODO: I don't want the bang operator to work on things that aren't booleans, should error
-		return FALSE
+		return newError("unknown operator: !%s", right.Type())
 	}
 }
 
@@ -280,8 +278,16 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 
 		return &object.Float{Value: lf.Value / rf.Value}
 	case ">>":
-		return &object.Integer{Value: leftInt.Value >> rightInt.Value}
+		if rightInt.Value < 0 {
+			return newError("cannot perform bit shift using negative number: %d >> %d", leftInt.Value, rightInt.Value)
+		}
+
+		return &object.Integer{Value: leftInt.Value >> uint64(rightInt.Value)}
 	case "<<":
+		if rightInt.Value < 0 {
+			return newError("cannot perform bit shift using negative number: %d << %d", leftInt.Value, rightInt.Value)
+		}
+
 		return &object.Integer{Value: leftInt.Value << rightInt.Value}
 
 	case "DIV":
