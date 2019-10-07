@@ -288,7 +288,7 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 			return newError("cannot perform bit shift using negative number: %d << %d", leftInt.Value, rightInt.Value)
 		}
 
-		return &object.Integer{Value: leftInt.Value << rightInt.Value}
+		return &object.Integer{Value: leftInt.Value << uint64(rightInt.Value)}
 
 	case "DIV":
 		return &object.Integer{Value: int64(
