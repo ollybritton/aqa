@@ -22,6 +22,7 @@ Additions to the spec (hence to `++`)
 
 Also, it **WILL* support the following (to be added)
 * Maps: using the `{` syntax `}`
+* Automatic type conversion: adding an integer to a string wont cause an error.
 * `FN`: similar to a subroutine, but an expression. This means `FN`s will be able to be passed around as arguments.
 
 ## Bugs
@@ -31,3 +32,4 @@ Also, it **WILL* support the following (to be added)
 - [ ] Builtins are not yet tested properly
 - [ ] You can currently overwrite builtins like `LEN <- 10`, `LEN([])` makes error `ERROR: not a subroutine, function or builtin: INTEGER`.
 - [ ] Lack of support for unicode
+- [ ] Comments have to be at the beginning of a line
