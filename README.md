@@ -5,7 +5,7 @@
   - [Syntax](#syntax)
     - [Specification](#specification)
     - [Additions](#additions)
-  - [Bugs/Todo](#bugstodo)
+  - [Todo](#todo)
 
 
 `AQA++` is an **unofficial** implementation of the [AQA psuedocode specification](https://filestore.aqa.org.uk/resources/computing/AQA-8520-TG-PC.PDF) in Go. It also supports some features that aren't in the spec (such as maps) in order to make it slightly more usable, hence the `++` in the name. It is interpreted and the design of the interpreter is based on the one described in the book [Writing An Interpreter in Go](https://interpreterbook.com/).
@@ -104,7 +104,9 @@ Also, it **WILL** support the following (to be added)
   #        "hello " + 5
   ```
 
-## Bugs/Todo
+## Todo
 - [ ] More tests
 - [ ] Better type conversion system
-- [ ] Lack of support for unicode
+- [ ] Add support for unicode
+- [ ] Compile the project to [WebAssembly](https://webassembly.org/) so that it can be run in the browser without [https://repl.it](https://repl.it)
+- [ ] Write a wiki/tutorial for the language
