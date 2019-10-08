@@ -93,6 +93,17 @@ Also, it **WILL** support the following (to be added)
   OUTPUT map([1,2,3,4,5], FN(x) { x + 5 } )
   ```
 
+* More meaningful error messages
+  ```
+  "hello " + 5
+  # Current output: "ERROR: type mismatch: STRING + INTEGER"
+
+  "hello " + 5
+  # Something like
+  # error: addition not supported on `string` and `integer` on line 5:
+  #        "hello " + 5
+  ```
+
 ## Bugs/Todo
 - [ ] More tests
 - [ ] Better type conversion system
