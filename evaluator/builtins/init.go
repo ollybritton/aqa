@@ -21,7 +21,9 @@ func init() {
 	Builtins["LEN"] = &object.Builtin{Fn: BuiltinLen}
 	Builtins["POSITION"] = &object.Builtin{Fn: BuiltinPosition}
 	Builtins["SUBSTRING"] = &object.Builtin{Fn: BuiltinSubstring}
+
 	Builtins["SLICE"] = &object.Builtin{Fn: BuiltinSlice}
+	Builtins["APPEND"] = &object.Builtin{Fn: BuiltinAppend}
 	Builtins["SUM"] = &object.Builtin{Fn: BuiltinSum}
 
 	Builtins["STRING_TO_INT"] = &object.Builtin{Fn: BuiltinStringToInt}
@@ -31,13 +33,14 @@ func init() {
 	Builtins["CHAR_TO_CODE"] = &object.Builtin{Fn: BuiltinCharToCode}
 	Builtins["CODE_TO_CHAR"] = &object.Builtin{Fn: BuiltinCodeToChar}
 
-	Builtins["RANDOM_INT"] = &object.Builtin{Fn: BuiltinRandomInt}
-
 	Builtins["OUTPUT"] = &object.Builtin{Fn: BuiltinOutput}
 	Builtins["PRINT"] = &object.Builtin{Fn: BuiltinPrint}
 	Builtins["INPUT"] = &object.Builtin{Fn: BuiltinInput}
 
+	Builtins["RANDOM_INT"] = &object.Builtin{Fn: BuiltinRandomInt}
 	Builtins["FLOOR"] = &object.Builtin{Fn: BuiltinFloor}
 	Builtins["CEIL"] = &object.Builtin{Fn: BuiltinCeil}
 	Builtins["SQRT"] = &object.Builtin{Fn: BuiltinSqrt}
+
+	Builtins["EXIT"] = &object.Builtin{Fn: BuiltinExit}
 }

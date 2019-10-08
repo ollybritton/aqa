@@ -3,6 +3,13 @@
 
 ![Example program, calculates the GCD of two numbers](_media/gcd.png)
 
+- [AQA++](#aqa)
+  - [Demo](#demo)
+  - [Syntax](#syntax)
+    - [Specification](#specification)
+    - [Additions](#additions)
+  - [Bugs/Todo](#bugstodo)
+
 ## Demo
 For now, if you want to try it out, you can go to [https://aqa.ollybr.repl.run/](https://aqa.ollybr.repl.run/) for a REPL and [https://repl.it/@ollybr/AQA](https://repl.it/@ollybr/AQA) if you want to write a file. Both of those are just REPL.ITs that download the executable from my website and run it.
 
@@ -10,7 +17,14 @@ For more examples, see the [_examples folder](_examples/).
 
 ## Syntax
 ### Specification
-Everything in the AQA specification.
+Everything in the AQA specification. One big difference is that there is no support for special characters at the moment. In the spec, it uses unicode characters such as `←` for assignment and `≥` for greater than or equal. In this version, only the ascii equivalents are supported.
+
+| Specification | Equivalent | Purpose                                   |
+|---------------|------------|-------------------------------------------|
+| `←`           | `<-`       | Assignment: `a <- 10`                     |
+| `≥`           | `>=`       | Greater than or equal: `10 >= 20 # false` |
+| `≤`           | `<=`       | Less than or equal: `10 <= 20 # true`     |
+| `≠`           | `!=`       | Not equal to: `10 != 20 # true`           |
 
 ### Additions
 Additions to the spec (hence to `++`)
@@ -23,13 +37,9 @@ Additions to the spec (hence to `++`)
 Also, it **WILL* support the following (to be added)
 * Maps: using the `{` syntax `}`
 * Automatic type conversion: adding an integer to a string wont cause an error.
-* `FN`: similar to a subroutine, but an expression. This means `FN`s will be able to be passed around as arguments.
+* `FN`: similar to a subroutine, but an expression. This means `FN`s will be able to be passed around as arguments. 
 
-## Bugs
-- [ ] A block for a SUBROUTINE can be ended by a ENDIF and vice versa
-- [ ] Idents with numbers do not parse
-- [ ] Blocks such as the ones on for/while loops do not create sepearate environments
-- [ ] Builtins are not yet tested properly
-- [ ] You can currently overwrite builtins like `LEN <- 10`, `LEN([])` makes error `ERROR: not a subroutine, function or builtin: INTEGER`.
+## Bugs/Todo
+- [ ] More tests
+- [ ] Better type conversion system
 - [ ] Lack of support for unicode
-- [ ] Comments have to be at the beginning of a line

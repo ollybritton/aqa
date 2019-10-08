@@ -109,7 +109,9 @@ func (p *Parser) Parse() *ast.Program {
 }
 
 func (p *Parser) nextToken() {
+
 	p.curToken = p.peekToken
+
 	p.peekToken = p.l.NextToken()
 }
 
@@ -176,18 +178,18 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 	p.nextToken()
 	stmt.Condition = p.parseExpression(LOWEST)
 
-	if !p.expectPeek(token.BLOCK_START) {
+	if !p.expectPeek(token.THEN) {
 		p.addError(
-			NewUnexpectedTokenError(p.curToken, p.peekToken, token.BLOCK_START),
+			NewUnexpectedTokenError(p.curToken, p.peekToken, token.THEN),
 		)
 
 		return nil
 	}
 
-	stmt.Consequence = p.parseBlockStatement([]token.Type{token.BLOCK_END, token.ELSE})
+	stmt.Consequence = p.parseBlockStatement([]token.Type{token.ENDIF, token.ELSE})
 
 	switch {
-	case p.curTokenIs(token.BLOCK_END):
+	case p.curTokenIs(token.ENDIF):
 		return stmt
 
 	case p.curTokenIs(token.ELSE) && p.peekTokenIs(token.IF):
@@ -201,7 +203,7 @@ func (p *Parser) parseIfStatement() *ast.IfStatement {
 			p.nextToken()
 		}
 
-		stmt.Else = p.parseBlockStatement([]token.Type{token.BLOCK_END})
+		stmt.Else = p.parseBlockStatement([]token.Type{token.ENDIF})
 
 		return stmt
 
@@ -223,18 +225,17 @@ func (p *Parser) parseElseIfStatement() *ast.IfStatement {
 
 	stmt.Condition = p.parseExpression(LOWEST)
 
-	if !p.expectPeek(token.BLOCK_START) {
-
+	if !p.expectPeek(token.THEN) {
 		return nil
 	}
 
-	stmt.Consequence = p.parseBlockStatement([]token.Type{token.BLOCK_END, token.ELSE})
+	stmt.Consequence = p.parseBlockStatement([]token.Type{token.ENDIF, token.ELSE})
 
 	switch {
 	case p.curTokenIs(token.ELSE) && p.peekTokenIs(token.IF):
 		stmt.ElseIf = p.parseElseIfStatement()
 
-	case p.curTokenIs(token.BLOCK_END) || p.curTokenIs(token.ELSE):
+	case p.curTokenIs(token.ENDIF) || p.curTokenIs(token.ELSE):
 		return stmt
 
 	default:
@@ -263,7 +264,7 @@ func (p *Parser) parseSubroutineDefinition() *ast.Subroutine {
 	}
 
 	sub.Parameters = p.parseParameters()
-	sub.Body = p.parseBlockStatement([]token.Type{token.BLOCK_END})
+	sub.Body = p.parseBlockStatement([]token.Type{token.ENDSUBROUTINE})
 
 	p.nextToken()
 
@@ -490,7 +491,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	if !p.expectPeek(token.NEWLINE) {
 		p.addError(NewUnexpectedTokenError(p.curToken, p.peekToken, token.NEWLINE))
 	}
-	while.Body = p.parseBlockStatement([]token.Type{token.BLOCK_END})
+	while.Body = p.parseBlockStatement([]token.Type{token.ENDWHILE})
 
 	return while
 }
@@ -524,7 +525,7 @@ func (p *Parser) parseForStatement() *ast.ForStatement {
 		p.addError(NewUnexpectedTokenError(p.curToken, p.peekToken, token.NEWLINE))
 	}
 
-	stmt.Body = p.parseBlockStatement([]token.Type{token.BLOCK_END})
+	stmt.Body = p.parseBlockStatement([]token.Type{token.ENDFOR})
 
 	return stmt
 }
@@ -541,8 +542,11 @@ func (p *Parser) parseRepeatStatement() *ast.RepeatStatement {
 }
 
 func (p *Parser) parseOutput() ast.Expression {
+
 	call := &ast.SubroutineCall{Tok: p.curToken}
+
 	call.Subroutine = &ast.Identifier{Tok: p.curToken, Value: "OUTPUT"}
+
 	p.nextToken()
 
 	call.Arguments = []ast.Expression{p.parseExpression(LOWEST)}

@@ -57,6 +57,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 
+		if isBuiltin(node.Name.Value) {
+			return newError("cannot assign to builtin: %s", node.Name.Value)
+		}
+
 		if node.Name.Constant {
 			err := env.SetConstant(node.Name.Value, val)
 			if isError(err) {
@@ -74,6 +78,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		body := node.Body
 		name := node.Name
 
+		if isBuiltin(name.Value) {
+			return newError("cannot assign to builtin: %s", node.Name.Value)
+		}
+
 		err := env.Set(name.Value, &object.Subroutine{Parameters: params, Env: env, Body: body, Name: name})
 		if isError(err) {
 			return err
@@ -81,6 +89,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.SubroutineCall:
 		ident := evalIdentifier(node.Subroutine, env)
+		if isError(ident) {
+			return ident
+		}
+
 		args := evalExpressions(node.Arguments, env)
 		if len(args) == 1 && isError(args[0]) {
 			return args[0]
@@ -276,6 +288,10 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 		lf := object.IntegerToFloat(leftInt)
 		rf := object.IntegerToFloat(rightInt)
 
+		if rf.Value == 0 {
+			return newError("division error: division by zero")
+		}
+
 		return &object.Float{Value: lf.Value / rf.Value}
 	case ">>":
 		if rightInt.Value < 0 {
@@ -330,6 +346,10 @@ func evalFloatInfixExpression(left object.Object, operator string, right object.
 	case "*":
 		return &object.Float{Value: lf.Value * rf.Value}
 	case "/":
+		if rf.Value == 0 {
+			return newError("division error: division by zero")
+		}
+
 		return &object.Float{Value: lf.Value / rf.Value}
 
 	case "DIV":
@@ -386,6 +406,12 @@ func evalStringInfixExpression(left object.Object, operator string, right object
 	switch operator {
 	case "+":
 		return &object.String{Value: leftVal + rightVal}
+
+	case "==", "=":
+		return nativeBoolToBooleanObject(leftVal == rightVal)
+
+	case "!=":
+		return nativeBoolToBooleanObject(leftVal != rightVal)
 
 	default:
 		// Translate the strings into integers
@@ -499,6 +525,10 @@ func evalForStatement(node *ast.ForStatement, env *object.Environment) object.Ob
 	var val object.Object
 
 	for i := lower.Value; i <= upper.Value; i++ {
+		if isBuiltin(node.Ident.Value) {
+			return newError("cannot assign to builtin: %s", node.Ident.Value)
+		}
+
 		err := extended.Set(node.Ident.Value, &object.Integer{Value: i})
 		if isError(err) {
 			return err
@@ -580,7 +610,11 @@ func evalStringIndexExpression(left, index object.Object) object.Object {
 func applySubroutine(sub object.Object, args []object.Object) object.Object {
 	switch sub := sub.(type) {
 	case *object.Subroutine:
-		extended := extendSubroutineEnv(sub, args)
+		extended, err := extendSubroutineEnv(sub, args)
+		if err != nil {
+			return err
+		}
+
 		evaluated := Eval(sub.Body, extended)
 		return unwrapReturnValue(evaluated)
 
@@ -592,14 +626,18 @@ func applySubroutine(sub object.Object, args []object.Object) object.Object {
 	}
 }
 
-func extendSubroutineEnv(sub *object.Subroutine, args []object.Object) *object.Environment {
+func extendSubroutineEnv(sub *object.Subroutine, args []object.Object) (*object.Environment, *object.Error) {
 	env := object.NewEnclosedEnvironment(sub.Env)
 
 	for paramIDx, param := range sub.Parameters {
+		if isBuiltin(param.Value) {
+			return &object.Environment{}, newError("cannot assign to builtin: %s", param.Value)
+		}
+
 		env.Set(param.Value, args[paramIDx])
 	}
 
-	return env
+	return env, nil
 }
 
 func unwrapReturnValue(obj object.Object) object.Object {

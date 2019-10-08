@@ -1,0 +1,23 @@
+# The Collatz Conjecture
+# https://en.wikipedia.org/wiki/Collatz_conjecture
+
+val <- INPUT("Please enter a start number: ")
+val <- STRING_TO_INT(val)
+steps <- 1
+
+WHILE val != 1
+  steps <- steps+1
+  OUTPUT val
+  if val MOD 2 == 0 then
+    # Here we do a right bitshift to divide by 2 so that val stays as an int.
+    # At the moment, there is no easy way to cast between floats and ints.
+    val <- val >> 1
+  else
+    val <- 3*val + 1
+  endif
+ENDWHILE
+
+OUTPUT val
+
+OUTPUT ""
+PRINT("It took", steps, "steps in total to reach 1.")

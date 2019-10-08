@@ -87,13 +87,16 @@ const (
 	FOR    = "FOR"
 	TO     = "TO"
 
+	ENDWHILE      = "ENDWHILE"
+	ENDFOR        = "ENDFOR"
+	ENDIF         = "ENDIF"
+	ENDSUBROUTINE = "ENDSUBROUTINE"
+
+	THEN = "THEN"
+
 	// Special 'functions'
 	OUTPUT    = "OUTPUT"
 	USERINPUT = "USERINPUT"
-
-	// Blocks
-	BLOCK_START = "BLOCK_START"
-	BLOCK_END   = "BLOCK_END"
 )
 
 // NewToken returns a new token from a given Type, Literal and position in the source.
@@ -119,18 +122,18 @@ var Keywords = map[string]Type{
 	"subroutine": SUBROUTINE,
 
 	"while":    WHILE,
-	"endwhile": BLOCK_END,
+	"endwhile": ENDWHILE,
 
 	"repeat": REPEAT,
 	"until":  UNTIL,
 
 	"for":    FOR,
-	"endfor": BLOCK_END,
+	"endfor": ENDFOR,
 	"to":     TO,
 
-	"then":          BLOCK_START, // IF <CONDITION> THEN ... ENDIF
-	"endif":         BLOCK_END,
-	"endsubroutine": BLOCK_END,
+	"then":          THEN, // IF <CONDITION> THEN ... ENDIF
+	"endif":         ENDIF,
+	"endsubroutine": ENDSUBROUTINE,
 
 	"output":    OUTPUT,
 	"userinput": USERINPUT,

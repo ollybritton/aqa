@@ -1,0 +1,25 @@
+# Arrays
+OUTPUT "Welcome to the Array Creator 3000"
+OUTPUT "Create a list of numbers and instantly find out statistics!"
+OUTPUT ""
+
+arr <- []
+in <- input("Enter a number or 'q' to stop: ")
+
+WHILE in != 'q'
+    arr <- append(arr, STRING_TO_REAL(in))
+    in <- input("Enter a number or 'q' to stop: ")
+ENDWHILE
+
+OUTPUT ""
+OUTPUT "Thank you for your time."
+
+IF len(arr) == 0 THEN
+    OUTPUT "It looks like you couldn't even be bothered to fill in the list."
+    OUTPUT "Goodbye."
+    EXIT()
+ENDIF
+
+PRINT("Is the first element 1?", arr[0] == 1)
+PRINT("What is the sum?", sum(arr))
+PRINT("What is the average?", sum(arr)/len(arr))

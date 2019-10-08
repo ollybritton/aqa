@@ -60,6 +60,7 @@ func (l *Lexer) peekChar() byte {
 
 // skipWhitespace will skip over whitespace. If it encounters a newline, it increments the startLine and resets the startPosition.
 func (l *Lexer) skipWhitespace() {
+
 	for isWhitespace(l.ch) {
 		l.readChar()
 	}
@@ -67,12 +68,15 @@ func (l *Lexer) skipWhitespace() {
 
 // skipComment will skip over a comment.
 func (l *Lexer) skipComment() {
+
 	if l.ch != '#' {
+
 		return
 	}
 
-	for l.ch != '\n' {
+	for l.ch != '\n' && l.ch != byte(0) {
 		l.readChar()
+
 	}
 
 	l.readChar()
@@ -83,15 +87,16 @@ func (l *Lexer) skipComment() {
 	if l.ch == '#' {
 		l.skipComment()
 	}
+
 }
 
 // readIdentifier will reads a set of characters (including an underscore) and returns the string representation of that
-// set of characters.
+// set of characters. It will allow numbers as long as the first character is not a number.
 func (l *Lexer) readIdentifier() string {
 	l.startPosition = l.curLinePosition
 	start := l.position
 
-	for isValidIdentCharacter(l.ch) {
+	for isValidIdentCharacter(l.ch) || isDigit(l.ch) && (l.curLinePosition != l.startPosition) {
 		l.readChar()
 	}
 
@@ -176,8 +181,11 @@ func (l *Lexer) newSingleToken(tokenType token.Type) token.Token {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
-	l.skipComment()
-	l.skipWhitespace()
+	for isWhitespace(l.ch) || l.ch == '#' {
+
+		l.skipWhitespace()
+		l.skipComment()
+	}
 
 	switch l.ch {
 	// Single characters
@@ -330,6 +338,7 @@ func (l *Lexer) NextToken() token.Token {
 	// Multiple character handling
 	default:
 		if isValidIdentCharacter(l.ch) {
+
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			tok.Line = l.curLine

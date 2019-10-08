@@ -43,7 +43,8 @@ OUTPUT USERINPUT
 2<<1
 1 MOD 2
 2 DIV 3
-NOT true OR false AND false XOR true`
+NOT true OR false AND false XOR true
+a123`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -103,7 +104,7 @@ NOT true OR false AND false XOR true`
 		{Type: token.NEWLINE, Literal: "\n", Line: 13, Column: 10},
 		{Type: token.IDENT, Literal: "a", Line: 14, Column: 1},
 		{Type: token.NEWLINE, Literal: "\n", Line: 14, Column: 2},
-		{Type: token.BLOCK_END, Literal: "ENDWHILE", Line: 15, Column: 0},
+		{Type: token.ENDWHILE, Literal: "ENDWHILE", Line: 15, Column: 0},
 
 		{Type: token.NEWLINE, Literal: "\n", Line: 15, Column: 8},
 		{Type: token.REPEAT, Literal: "REPEAT", Line: 16, Column: 0},
@@ -123,7 +124,7 @@ NOT true OR false AND false XOR true`
 		{Type: token.NEWLINE, Literal: "\n", Line: 19, Column: 17},
 		{Type: token.IDENT, Literal: "a", Line: 20, Column: 1},
 		{Type: token.NEWLINE, Literal: "\n", Line: 20, Column: 2},
-		{Type: token.BLOCK_END, Literal: "ENDFOR", Line: 21, Column: 0},
+		{Type: token.ENDFOR, Literal: "ENDFOR", Line: 21, Column: 0},
 
 		{Type: token.NEWLINE, Literal: "\n", Line: 21, Column: 6},
 		// ...skip comments...
@@ -184,7 +185,10 @@ NOT true OR false AND false XOR true`
 		{Type: token.XOR, Literal: "XOR", Line: 35, Column: 28},
 		{Type: token.TRUE, Literal: "true", Line: 35, Column: 32},
 
-		{Type: token.EOF, Literal: "", Line: 35, Column: 35},
+		{Type: token.NEWLINE, Literal: "\n", Line: 35, Column: 36},
+		{Type: token.IDENT, Literal: "a123", Line: 36, Column: 0},
+
+		{Type: token.EOF, Literal: "", Line: 36, Column: 3},
 	}
 
 	l := New(input)

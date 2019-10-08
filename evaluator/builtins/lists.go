@@ -144,3 +144,22 @@ func BuiltinSlice(args ...object.Object) object.Object {
 
 	return &object.Array{Elements: array.Elements[start.Value : end.Value+1]}
 }
+
+// BuiltinAppend will append an object to an array.
+func BuiltinAppend(args ...object.Object) object.Object {
+	if len(args) < 2 {
+		return newError("wrong number of arguments. expected `append(array, nums...)` (>2 args), got=%d", len(args))
+	}
+
+	arr, ok := args[0].(*object.Array)
+	if !ok {
+		return newError("expecting array as argument 1 to APPEND. got=%s", args[0].Type())
+	}
+
+	args = args[1:]
+	for _, a := range args {
+		arr.Elements = append(arr.Elements, a)
+	}
+
+	return arr
+}
