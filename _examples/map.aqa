@@ -1,0 +1,15 @@
+SUBROUTINE map(arr, fn)
+    newArr <- []
+
+    FOR i <- 0 TO LEN(arr)-1
+        newArr <- APPEND(newArr, fn(arr[i]))
+    ENDFOR
+
+    return newArr
+ENDSUBROUTINE
+
+SUBROUTINE add_5(x)
+    return x + 5
+ENDSUBROUTINE
+
+OUTPUT map([1,2,3,4,5], add_5)
