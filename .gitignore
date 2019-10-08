@@ -1,1 +1,4 @@
 update_server.sh
+.DS_STORE
+.vscode
+.vscode/*
