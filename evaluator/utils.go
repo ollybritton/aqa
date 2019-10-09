@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ollybritton/aqa/evaluator/builtins"
+	"github.com/ollybritton/aqa/builtins"
 	"github.com/ollybritton/aqa/object"
 )
 

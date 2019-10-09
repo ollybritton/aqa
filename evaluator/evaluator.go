@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ollybritton/aqa/ast"
-	"github.com/ollybritton/aqa/evaluator/builtins"
+	"github.com/ollybritton/aqa/builtins"
 	"github.com/ollybritton/aqa/object"
 )
 
@@ -244,13 +244,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 }
 
 func evalInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	if left.Type() == object.INTEGER_OBJ && right.Type() == object.FLOAT_OBJ {
-		left = object.IntegerToFloat(left.(*object.Integer))
-	}
-
-	if right.Type() == object.INTEGER_OBJ && left.Type() == object.FLOAT_OBJ {
-		right = object.IntegerToFloat(right.(*object.Integer))
-	}
+	left, right = coerceInfix(left, operator, right)
 
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:

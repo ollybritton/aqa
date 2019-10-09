@@ -70,8 +70,8 @@ Also, it **WILL** support the following (to be added)
 
 * Type Coercion
   ```
-  name <- INPUT("What is your name? ")
-  OUTPUT "Hello, " + name
+  fav_num <- 5
+  OUTPUT "Your favourite number is: " + fav_num
 
   # At the moment this produces the error
   # ERROR: type mismatch: STRING + INTEGER
@@ -100,8 +100,9 @@ Also, it **WILL** support the following (to be added)
 
   "hello " + 5
   # Something like
-  # error: addition not supported on `string` and `integer` on line 5:
+  # error: addition not supported for `string` and `integer` on line 5:
   #        "hello " + 5
+  # did you mean: "hello " + string(5)
   ```
 
 ## Todo
