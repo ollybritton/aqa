@@ -3,6 +3,7 @@ package object
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/ollybritton/aqa/ast"
@@ -57,7 +58,7 @@ type Float struct {
 }
 
 func (f *Float) Type() Type      { return FLOAT_OBJ }
-func (f *Float) Inspect() string { return fmt.Sprintf("%f", f.Value) }
+func (f *Float) Inspect() string { return strconv.FormatFloat(f.Value, 'f', -1, 64) }
 
 // Boolean represents a boolean value, such as true or false, within the program.
 type Boolean struct {
