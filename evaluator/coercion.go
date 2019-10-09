@@ -11,10 +11,6 @@ import "github.com/ollybritton/aqa/object"
 // int, float => float & float
 // float, int => float & float
 func coerceInfix(left object.Object, operator string, right object.Object) (object.Object, object.Object) {
-	if left.Type() == right.Type() {
-		return left, right
-	}
-
 	switch {
 	case left.Type() == object.STRING_OBJ && operator == "+" && right.Type() == object.FLOAT_OBJ:
 		x := left.(*object.String)
@@ -40,6 +36,35 @@ func coerceInfix(left object.Object, operator string, right object.Object) (obje
 
 		return object.IntegerToString(x), y
 
+	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+		leftStr := left.(*object.String)
+		rightStr := right.(*object.String)
+
+		var x object.Object
+		var y object.Object
+		var err error
+
+		switch operator {
+		case "+", "-", "*", "/", "MOD", "DIV", "<<", ">>":
+			x, err = object.StringToInteger(leftStr)
+			if err != nil {
+				x, err = object.StringToFloat(leftStr)
+				if err != nil {
+					break
+				}
+			}
+
+			y, err = object.StringToInteger(rightStr)
+			if err != nil {
+				y, err = object.StringToFloat(rightStr)
+				if err != nil {
+					break
+				}
+			}
+
+			return coerceInfix(x, operator, y)
+		}
+
 	case left.Type() == object.FLOAT_OBJ && right.Type() == object.INTEGER_OBJ:
 		x := left.(*object.Float)
 		y := right.(*object.Integer)
@@ -55,4 +80,6 @@ func coerceInfix(left object.Object, operator string, right object.Object) (obje
 	default:
 		return left, right
 	}
+
+	return left, right
 }

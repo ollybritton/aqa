@@ -11,7 +11,7 @@ WHILE val != 1
   if val MOD 2 == 0 then
     # Here we do a right bitshift to divide by 2 so that val stays as an int.
     # At the moment, there is no easy way to cast between floats and ints.
-    val <- val >> 1
+    val <- val / 2
   else
     val <- 3*val + 1
   endif

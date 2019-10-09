@@ -279,12 +279,16 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 	case "*":
 		return &object.Integer{Value: leftInt.Value * rightInt.Value}
 	case "/":
-		lf := object.IntegerToFloat(leftInt)
-		rf := object.IntegerToFloat(rightInt)
-
-		if rf.Value == 0 {
+		if rightInt.Value == 0 {
 			return newError("division error: division by zero")
 		}
+
+		if leftInt.Value%rightInt.Value == 0 {
+			return &object.Integer{Value: leftInt.Value / rightInt.Value}
+		}
+
+		lf := object.IntegerToFloat(leftInt)
+		rf := object.IntegerToFloat(rightInt)
 
 		return &object.Float{Value: lf.Value / rf.Value}
 	case ">>":
