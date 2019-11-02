@@ -21,7 +21,7 @@ func (e UnexpectedTokenError) Error() string {
 
 // NewUnexpectedTokenError returns a new UnexpectedTokenError.
 func NewUnexpectedTokenError(curTok, peekTok token.Token, expected token.Type) UnexpectedTokenError {
-	msg := fmt.Sprintf("expected next token to be '%s', got '%s' instead. (line=%d, col=%d)", expected, peekTok.Type, peekTok.Line, peekTok.Column)
+	msg := fmt.Sprintf("expected next token to be '%s', got '%s' instead. (line=%d, startcol=%d, encdol=%d)", expected, peekTok.Type, peekTok.Line, peekTok.StartCol, peekTok.EndCol)
 
 	return UnexpectedTokenError{
 		Message: msg,
@@ -48,7 +48,7 @@ func (e InvalidTokenError) Error() string {
 
 // NewInvalidTokenError returns a new InvalidTokenError.
 func NewInvalidTokenError(curTok, peekTok token.Token, unexpected token.Token) InvalidTokenError {
-	msg := fmt.Sprintf("unexpected token '%s', invalid in context (line=%d, col=%d)", unexpected, unexpected.Line, unexpected.Column)
+	msg := fmt.Sprintf("unexpected token '%s', invalid in context (line=%d, startcol=%d, endcol=%d)", unexpected, unexpected.Line, unexpected.StartCol, unexpected.EndCol)
 
 	return InvalidTokenError{
 		Message: msg,
@@ -127,7 +127,7 @@ func (e NoPrefixParseFnError) Error() string {
 
 // NewNoPrefixParseFnError returns a new NoPrefixParseFnError
 func NewNoPrefixParseFnError(curTok, peekTok token.Token, unknown token.Type) NoPrefixParseFnError {
-	msg := fmt.Sprintf("no prefix parse function for '%s' found (line=%d, col=%d)", unknown, curTok.Line, curTok.Column)
+	msg := fmt.Sprintf("no prefix parse function for '%s' found (line=%d, startcol=%d, endcol=%d)", unknown, curTok.Line, curTok.StartCol, curTok.EndCol)
 
 	return NoPrefixParseFnError{
 		Message: msg,
