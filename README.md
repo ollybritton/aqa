@@ -58,6 +58,14 @@ Additions to the spec (hence to `++`)
   bin << 3 # 0b1000 or 8
   ```
 
+* Type Coercion
+  ```
+  fav_num <- 5
+  OUTPUT "Your favourite number is: " + fav_num
+
+  # No need to convert to string.
+  ```
+
 Also, it **WILL** support the following (to be added)
 * Maps: using the `{` syntax `}`
   ```
@@ -66,17 +74,6 @@ Also, it **WILL** support the following (to be added)
     "goodbye": false,
     [1,2]: "foo"
   }
-  ```
-
-* Type Coercion
-  ```
-  fav_num <- 5
-  OUTPUT "Your favourite number is: " + fav_num
-
-  # At the moment this produces the error
-  # ERROR: type mismatch: STRING + INTEGER
-
-  # It will just work in the future.
   ```
 
 * `FN`: A function definition that is an expression. Like Python's lambda.

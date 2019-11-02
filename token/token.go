@@ -63,6 +63,7 @@ const (
 	// Delimeters
 	COMMA   = ","
 	NEWLINE = "\\n"
+	COLON   = ":"
 
 	// Brackets/Braces/Parenthesis
 	LPAREN   = "("
@@ -93,6 +94,7 @@ const (
 	ENDSUBROUTINE = "ENDSUBROUTINE"
 
 	THEN = "THEN"
+	MAP  = "MAP"
 
 	// Special 'functions'
 	OUTPUT    = "OUTPUT"
@@ -145,6 +147,8 @@ var Keywords = map[string]Type{
 	"and": AND,
 	"or":  OR,
 	"xor": XOR,
+
+	"map": MAP,
 }
 
 // LookupKeyword converts a keyword name into a keyword.

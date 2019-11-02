@@ -49,6 +49,8 @@ func New(l *lexer.Lexer) *Parser {
 
 		token.OUTPUT:    p.parseOutput,
 		token.USERINPUT: p.parseUserinput,
+
+		token.MAP: p.parseHashLiteral,
 	}
 
 	p.infixParseFns = map[token.Type]infixParseFn{
@@ -609,4 +611,8 @@ func (p *Parser) parseConstantAssignment() *ast.VariableAssignment {
 	stmt.Name.Constant = true
 
 	return stmt
+}
+
+func (p *Parser) parseHashLiteral() ast.Expression {
+	return &ast.HashLiteral{}
 }

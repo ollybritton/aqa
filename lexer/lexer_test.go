@@ -44,7 +44,10 @@ OUTPUT USERINPUT
 1 MOD 2
 2 DIV 3
 NOT true OR false AND false XOR true
-a123`
+a123
+MAP {
+    "a": 10,
+}`
 
 	tests := []token.Token{
 		{Type: token.IDENT, Literal: "five", Line: 0, Column: 0},
@@ -188,7 +191,20 @@ a123`
 		{Type: token.NEWLINE, Literal: "\n", Line: 35, Column: 36},
 		{Type: token.IDENT, Literal: "a123", Line: 36, Column: 0},
 
-		{Type: token.EOF, Literal: "", Line: 36, Column: 3},
+		{Type: token.NEWLINE, Literal: "\n", Line: 36, Column: 4},
+		{Type: token.MAP, Literal: "MAP", Line: 37, Column: 0},
+		{Type: token.LBRACE, Literal: "{", Line: 37, Column: 4},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 37, Column: 5},
+		{Type: token.STRING, Literal: "a", Line: 38, Column: 4},
+		{Type: token.COLON, Literal: ":", Line: 38, Column: 7},
+		{Type: token.INT, Literal: "10", Line: 38, Column: 9},
+		{Type: token.COMMA, Literal: ",", Line: 38, Column: 11},
+
+		{Type: token.NEWLINE, Literal: "\n", Line: 38, Column: 12},
+		{Type: token.RBRACE, Literal: "}", Line: 39, Column: 0},
+
+		{Type: token.EOF, Literal: "", Line: 39, Column: 0},
 	}
 
 	l := New(input)

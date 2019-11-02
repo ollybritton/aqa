@@ -209,3 +209,14 @@ func (ie *IndexExpression) String() string {
 
 	return out.String()
 }
+
+// HashLiteral represents a hashmap inside the AST.
+type HashLiteral struct {
+	Tok token.Token // The token.MAP token.
+}
+
+func (hl *HashLiteral) expressionNode()    {}
+func (hl *HashLiteral) Token() token.Token { return hl.Tok }
+func (hl *HashLiteral) String() string {
+	return "<hash>"
+}

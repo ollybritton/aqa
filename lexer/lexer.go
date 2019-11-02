@@ -199,6 +199,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newSingleToken(token.SLASH)
 	case ',':
 		tok = l.newSingleToken(token.COMMA)
+	case ':':
+		tok = l.newSingleToken(token.COLON)
 	case '(':
 		tok = l.newSingleToken(token.LPAREN)
 	case ')':
