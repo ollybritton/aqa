@@ -15,14 +15,19 @@ type Token struct {
 	Type    Type   // The type of token.
 	Literal string // The literal value of the token, such as "5" or "true".
 
-	Line   int // The line the token is located at.
-	Column int // The location of the start of the token.
+	Line     int // The line the token is located at.
+	StartCol int // The location of the start of the token.
+	EndCol   int // The location of the end of the token.
 }
 
 // String returns a string representation of the token.
 // The format is LITERAL<TYPE>(line=LINE_NUM,col=COL_NUM)
 func (t Token) String() string {
-	return fmt.Sprintf("(Lit: '%s', Type: '%s', line=%d, col=%d)", t.Literal, t.Type, t.Line, t.Column)
+	if t.Literal == "\n" {
+		return fmt.Sprintf("(Lit: '%s', Type: '%s', line=%d, startcol=%d, endcol=%d)", "\\n", t.Type, t.Line, t.StartCol, t.EndCol)
+	}
+
+	return fmt.Sprintf("(Lit: '%s', Type: '%s', line=%d, startcol=%d, endcol=%d)", t.Literal, t.Type, t.Line, t.StartCol, t.EndCol)
 }
 
 // Definitions of token types.
@@ -102,12 +107,13 @@ const (
 )
 
 // NewToken returns a new token from a given Type, Literal and position in the source.
-func NewToken(tokenType Type, lit string, line int, col int) Token {
+func NewToken(tokenType Type, lit string, line, startCol, endCol int) Token {
 	return Token{
-		Type:    tokenType,
-		Literal: lit,
-		Line:    line,
-		Column:  col,
+		Type:     tokenType,
+		Literal:  lit,
+		Line:     line,
+		StartCol: startCol,
+		EndCol:   endCol,
 	}
 }
 
@@ -133,7 +139,7 @@ var Keywords = map[string]Type{
 	"endfor": ENDFOR,
 	"to":     TO,
 
-	"then":          THEN, // IF <CONDITION> THEN ... ENDIF
+	"then":          THEN,
 	"endif":         ENDIF,
 	"endsubroutine": ENDSUBROUTINE,
 

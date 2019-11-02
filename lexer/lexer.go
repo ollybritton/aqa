@@ -174,7 +174,7 @@ func (l *Lexer) readString(start byte) string {
 
 // newSingleToken returns a new token from a token type.
 func (l *Lexer) newSingleToken(tokenType token.Type) token.Token {
-	return token.NewToken(tokenType, string(l.ch), l.curLine, l.curLinePosition)
+	return token.NewToken(tokenType, string(l.ch), l.curLine, l.curLinePosition, l.curLinePosition)
 }
 
 // NextToken returns the next token in the input.
@@ -221,10 +221,11 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 
 			tok = token.Token{
-				Type:    token.EQ,
-				Literal: string(prev) + string(l.ch),
-				Line:    l.curLine,
-				Column:  l.curLinePosition - 1, // Token started on the previous character
+				Type:     token.EQ,
+				Literal:  string(prev) + string(l.ch),
+				Line:     l.curLine,
+				StartCol: l.curLinePosition - 1, // Token started on the previous character
+				EndCol:   l.curLinePosition,
 			}
 		} else {
 			// Assignment is handled using <- in AQA++
@@ -238,10 +239,11 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 
 			tok = token.Token{
-				Type:    token.NOT_EQ,
-				Literal: string(prev) + string(l.ch),
-				Line:    l.curLine,
-				Column:  l.curLinePosition - 1,
+				Type:     token.NOT_EQ,
+				Literal:  string(prev) + string(l.ch),
+				Line:     l.curLine,
+				StartCol: l.curLinePosition - 1,
+				EndCol:   l.curLinePosition,
 			}
 		} else {
 			tok = l.newSingleToken(token.BANG)
@@ -253,30 +255,33 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 
 			tok = token.Token{
-				Type:    token.ASSIGN,
-				Literal: string(prev) + string(l.ch),
-				Line:    l.curLine,
-				Column:  l.curLinePosition - 1,
+				Type:     token.ASSIGN,
+				Literal:  string(prev) + string(l.ch),
+				Line:     l.curLine,
+				StartCol: l.curLinePosition - 1,
+				EndCol:   l.curLinePosition,
 			}
 		} else if l.peekChar() == '=' {
 			prev := l.ch
 			l.readChar()
 
 			tok = token.Token{
-				Type:    token.LT_EQ,
-				Literal: string(prev) + string(l.ch),
-				Line:    l.curLine,
-				Column:  l.curLinePosition - 1,
+				Type:     token.LT_EQ,
+				Literal:  string(prev) + string(l.ch),
+				Line:     l.curLine,
+				StartCol: l.curLinePosition - 1,
+				EndCol:   l.curLinePosition,
 			}
 		} else if l.peekChar() == '<' {
 			prev := l.ch
 			l.readChar()
 
 			tok = token.Token{
-				Type:    token.LSHIFT,
-				Literal: string(prev) + string(l.ch),
-				Line:    l.curLine,
-				Column:  l.curLinePosition - 1,
+				Type:     token.LSHIFT,
+				Literal:  string(prev) + string(l.ch),
+				Line:     l.curLine,
+				StartCol: l.curLinePosition - 1,
+				EndCol:   l.curLinePosition,
 			}
 		} else {
 			tok = l.newSingleToken(token.LT)
@@ -288,20 +293,22 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 
 			tok = token.Token{
-				Type:    token.GT_EQ,
-				Literal: string(prev) + string(l.ch),
-				Line:    l.curLine,
-				Column:  l.curLinePosition - 1,
+				Type:     token.GT_EQ,
+				Literal:  string(prev) + string(l.ch),
+				Line:     l.curLine,
+				StartCol: l.curLinePosition - 1,
+				EndCol:   l.curLinePosition,
 			}
 		} else if l.peekChar() == '>' {
 			prev := l.ch
 			l.readChar()
 
 			tok = token.Token{
-				Type:    token.RSHIFT,
-				Literal: string(prev) + string(l.ch),
-				Line:    l.curLine,
-				Column:  l.curLinePosition - 1,
+				Type:     token.RSHIFT,
+				Literal:  string(prev) + string(l.ch),
+				Line:     l.curLine,
+				StartCol: l.curLinePosition - 1,
+				EndCol:   l.curLinePosition,
 			}
 		} else {
 			tok = l.newSingleToken(token.GT)
@@ -310,13 +317,15 @@ func (l *Lexer) NextToken() token.Token {
 	// String handling
 	case '\'':
 		tok.Literal = l.readString('\'')
-		tok.Column = l.startPosition
+		tok.StartCol = l.startPosition
+		tok.EndCol = l.curLinePosition
 		tok.Line = l.curLine
 		tok.Type = token.STRING
 
 	case '"':
 		tok.Literal = l.readString('"')
-		tok.Column = l.startPosition
+		tok.StartCol = l.startPosition
+		tok.EndCol = l.curLinePosition
 		tok.Line = l.curLine
 		tok.Type = token.STRING
 
@@ -334,24 +343,27 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
-		tok.Column = l.curLinePosition
+		tok.StartCol = l.curLinePosition
+		tok.EndCol = l.curLinePosition
 		tok.Line = l.curLine
 
 	// Multiple character handling
 	default:
 		if isValidIdentCharacter(l.ch) {
-
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			tok.Line = l.curLine
-			tok.Column = l.startPosition
+			tok.StartCol = l.startPosition
+			tok.EndCol = l.curLinePosition - 1
+
 			return tok
 		} else if isDigit(l.ch) {
 			literal, t := l.readNumber()
 			tok.Literal = literal
 			tok.Type = t
 			tok.Line = l.curLine
-			tok.Column = l.startPosition
+			tok.StartCol = l.startPosition
+			tok.EndCol = l.curLinePosition - 1
 
 			return tok
 		}
