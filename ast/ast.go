@@ -36,7 +36,7 @@ func (p *Program) Token() token.Token {
 		return p.Statements[0].Token()
 	}
 
-	return token.NewToken(token.ILLEGAL, "", 0, 0)
+	return token.NewToken(token.ILLEGAL, "", 0, 0, 0)
 }
 
 func (p *Program) String() string {

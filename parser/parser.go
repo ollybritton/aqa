@@ -50,7 +50,8 @@ func New(l *lexer.Lexer) *Parser {
 		token.OUTPUT:    p.parseOutput,
 		token.USERINPUT: p.parseUserinput,
 
-		token.MAP: p.parseHashLiteral,
+		token.MAP:    p.parseHashLiteral,
+		token.LBRACE: p.parseHashLiteral,
 	}
 
 	p.infixParseFns = map[token.Type]infixParseFn{
@@ -614,5 +615,45 @@ func (p *Parser) parseConstantAssignment() *ast.VariableAssignment {
 }
 
 func (p *Parser) parseHashLiteral() ast.Expression {
-	return &ast.HashLiteral{}
+	hash := &ast.HashLiteral{Tok: p.curToken}
+	hash.Pairs = make(map[ast.Expression]ast.Expression)
+
+	p.skipNewlines()
+
+	if p.curTokenIs(token.MAP) {
+		p.nextToken()
+	}
+
+	p.nextToken()
+
+	for !p.peekTokenIs(token.RBRACE) {
+		p.skipNewlines()
+
+		if p.curTokenIs(token.RBRACE) {
+			return hash
+		}
+
+		key := p.parseExpression(LOWEST)
+
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		hash.Pairs[key] = value
+
+		p.nextToken()
+
+		if p.curTokenIs(token.COMMA) {
+			p.nextToken()
+			p.skipNewlines()
+		} else {
+			break
+		}
+	}
+
+	p.skipNewlines()
+
+	return hash
 }

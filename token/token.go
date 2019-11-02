@@ -101,6 +101,12 @@ const (
 	THEN = "THEN"
 	MAP  = "MAP"
 
+	// Importing
+	// IMPORT exampleFn, newExample FROM "path"
+	IMPORT = "IMPORT"
+	AS     = "AS"
+	FROM   = "FROM"
+
 	// Special 'functions'
 	OUTPUT    = "OUTPUT"
 	USERINPUT = "USERINPUT"

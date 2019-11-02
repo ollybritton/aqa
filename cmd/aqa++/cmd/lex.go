@@ -63,8 +63,8 @@ func prettyToken(t token.Token) string {
 		ttype = fmt.Sprint(au.Green(au.Italic(t.Type)))
 	}
 
-	return fmt.Sprintf("(Lit: '%s', Type: '%s', line=%d, col=%d)",
-		literal, ttype, t.Line, t.Column,
+	return fmt.Sprintf("(Lit: '%s', Type: '%s', line=%d, startcol=%d, endcol=%d)",
+		literal, ttype, t.Line, t.StartCol, t.EndCol,
 	)
 }
 

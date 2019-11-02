@@ -35,3 +35,9 @@ func (p *Parser) peekPrecedence() int {
 
 	return LOWEST
 }
+
+func (p *Parser) skipNewlines() {
+	for p.curTokenIs(token.NEWLINE) {
+		p.nextToken()
+	}
+}

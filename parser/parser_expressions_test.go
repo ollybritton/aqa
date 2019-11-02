@@ -411,6 +411,98 @@ func TestParsingIndexExpression(t *testing.T) {
 	}
 }
 
+func TestParsingHashLiteralWithStringKeys(t *testing.T) {
+	input := `MAP { 'one': 1, 'two': 2, 'three': 3 }`
+
+	_, program := parseProgram(t, input)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	mapStmt, ok := stmt.Expression.(*ast.HashLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.HashLiteral, got=%T", stmt.Expression)
+	}
+
+	if len(mapStmt.Pairs) != 3 {
+		t.Fatalf("hash.Pairs has wrong length. got=%d, want=3", len(mapStmt.Pairs))
+	}
+
+	expected := map[string]int64{
+		"one":   1,
+		"two":   2,
+		"three": 3,
+	}
+
+	for k, v := range mapStmt.Pairs {
+		literal, ok := k.(*ast.StringLiteral)
+		if !ok {
+			t.Errorf("key is not *ast.StringLiteral. got=%T", literal)
+		}
+
+		expectedValue := expected[literal.Value]
+		testIntegerLiteral(t, v, expectedValue)
+	}
+}
+
+func TestParsingEmptyHashLiteral(t *testing.T) {
+	input := `MAP {}`
+
+	_, program := parseProgram(t, input)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	mapStmt, ok := stmt.Expression.(*ast.HashLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.HashLiteral, got=%T", stmt.Expression)
+	}
+
+	if len(mapStmt.Pairs) != 0 {
+		t.Fatalf("hash.Pairs has wrong length. got=%d, want=0", len(mapStmt.Pairs))
+	}
+}
+
+func TestParsingHashLiteralsWithExpressions(t *testing.T) {
+	input := `MAP { 'one': 0+1, 'two': 8/4, 'three': 27/9 }`
+
+	_, program := parseProgram(t, input)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	mapStmt, ok := stmt.Expression.(*ast.HashLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.HashLiteral, got=%T", stmt.Expression)
+	}
+
+	if len(mapStmt.Pairs) != 3 {
+		t.Fatalf("hash.Pairs has wrong length. got=%d, want=3", len(mapStmt.Pairs))
+	}
+
+	tests := map[string]func(ast.Expression){
+		"one": func(e ast.Expression) {
+			testInfixExpression(t, e, 0, "+", 1)
+		},
+		"two": func(e ast.Expression) {
+			testInfixExpression(t, e, 8, "/", 4)
+		},
+		"three": func(e ast.Expression) {
+			testInfixExpression(t, e, 27, "/", 9)
+		},
+	}
+
+	for k, v := range mapStmt.Pairs {
+		literal, ok := k.(*ast.StringLiteral)
+		if !ok {
+			t.Errorf("key is not ast.StringLiteral. got=%T", k)
+			continue
+		}
+
+		testFunc, ok := tests[literal.Value]
+		if !ok {
+			t.Errorf("No test function for key %q found", literal.String())
+			continue
+		}
+
+		testFunc(v)
+	}
+}
+
 // private functions for testing
 func testLiteralExpression(t *testing.T, exp ast.Expression, expected interface{}) bool {
 	switch v := expected.(type) {

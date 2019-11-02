@@ -534,6 +534,93 @@ func TestArrayIndexExpressions(t *testing.T) {
 
 }
 
+func TestHashLiterals(t *testing.T) {
+	input := `two <- "two"
+	MAP {                                
+		"one": 10 - 9,
+		two: 1 + 1,
+		"thr" + "ee": 6 / 2,
+		4: 4,
+		true: 5,
+		false: 6
+}`
+
+	evaluated := testEval(t, input)
+	result, ok := evaluated.(*object.Hash)
+	if !ok {
+		t.Fatalf("Eval didn't return Hash. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	expected := map[object.HashKey]int64{
+		(&object.String{Value: "one"}).HashKey():   1,
+		(&object.String{Value: "two"}).HashKey():   2,
+		(&object.String{Value: "three"}).HashKey(): 3,
+		(&object.Integer{Value: 4}).HashKey():      4,
+		TRUE.HashKey():                             5,
+		FALSE.HashKey():                            6,
+	}
+
+	if len(result.Pairs) != len(expected) {
+		t.Fatalf("Hash has wrong num of pairs. got=%d", len(result.Pairs))
+	}
+
+	for ek, ev := range expected {
+		pair, ok := result.Pairs[ek]
+		if !ok {
+			t.Errorf("no pair for give key in Pairs")
+		}
+
+		testIntegerObject(t, pair.Value, ev)
+	}
+}
+
+func TestHashIndexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`{"foo": 5}["foo"]`,
+			5,
+		},
+		{
+			`{"foo": 5}["bar"]`,
+			nil,
+		},
+		{
+			`key <- "foo"
+			{"foo": 5}[key]`,
+			5,
+		},
+		{
+			`{}["foo"]`,
+			nil,
+		},
+		{
+			`{5: 5}[5]`,
+			5,
+		},
+		{
+			`{true: 5}[true]`,
+			5,
+		},
+		{
+			`{false: 5}[false]`,
+			5,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		integer, ok := tt.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
 // private testing methods/functions
 func testEval(t *testing.T, input string) object.Object {
 	l := lexer.New(input)

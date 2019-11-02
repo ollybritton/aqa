@@ -11,13 +11,13 @@ func TestString(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
 			&VariableAssignment{
-				Tok: token.NewToken(token.IDENT, "a", 0, 0),
+				Tok: token.NewToken(token.IDENT, "a", 0, 0, 0),
 				Name: &Identifier{
-					Tok:   token.NewToken(token.IDENT, "a", 0, 0),
+					Tok:   token.NewToken(token.IDENT, "a", 0, 0, 0),
 					Value: "a",
 				},
 				Value: &Identifier{
-					Tok:   token.NewToken(token.IDENT, "b", 0, 0),
+					Tok:   token.NewToken(token.IDENT, "b", 0, 0, 0),
 					Value: "b",
 				},
 			},
