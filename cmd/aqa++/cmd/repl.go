@@ -2,16 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"io"
-	"strings"
+	"io/ioutil"
 
-	"github.com/chzyer/readline"
+	"github.com/logrusorgru/aurora"
 	au "github.com/logrusorgru/aurora"
 	"github.com/ollybritton/aqa/evaluator"
-	"github.com/ollybritton/aqa/lexer"
 	"github.com/ollybritton/aqa/object"
-	"github.com/ollybritton/aqa/parser"
-	"github.com/ollybritton/aqa/token"
+	"github.com/ollybritton/aqa/repl"
 	"github.com/spf13/cobra"
 )
 
@@ -25,85 +22,69 @@ var replCmd = &cobra.Command{
 	repl lex: perform lexical analysis on the input text
 	repl parse: parse the input text into an AST`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l, err := readline.NewEx(&readline.Config{
-			Prompt:            "\033[31m»\033[0m ",
-			HistoryFile:       "/tmp/aqa-repl.hist.tmp",
-			InterruptPrompt:   "^C",
-			EOFPrompt:         "exit",
-			HistorySearchFold: true,
-		})
+		shouldLex, err := cmd.Flags().GetBool("lex")
 		if err != nil {
-			fmt.Println(
-				"error:", au.Red(err),
-			)
+			fmt.Println(au.Red("Could not fetch 'lex' flag:").Bold())
+			fmt.Println(au.Red(err))
+			return
 		}
-		defer l.Close()
+
+		shouldParse, err := cmd.Flags().GetBool("parse")
+		if err != nil {
+			fmt.Println(au.Red("Could not fetch 'parse' flag:").Bold())
+			fmt.Println(au.Red(err))
+			return
+		}
+
+		if shouldLex && shouldParse {
+			fmt.Println(au.Red("Both the --lex and --parse flags are passed, please pass only one.").Bold())
+			return
+		}
+
+		file, err := cmd.Flags().GetString("file")
+		if err != nil {
+			fmt.Println(au.Red("Could not fetch 'file' flag:").Bold())
+			fmt.Println(au.Red(err))
+			return
+		}
 
 		env := object.NewEnvironment()
 
-		var lvl int
-		var buffer string
+		if file != "" {
+			bytes, err := ioutil.ReadFile(file)
+			if err != nil {
+				fmt.Println(au.Red("Could not read file " + file).Bold())
+				fmt.Println(au.Red(err))
+				return
+			}
 
-		for {
-			line, err := l.Readline()
-			if err == readline.ErrInterrupt {
-				if len(line) == 0 {
-					break
-				} else {
-					continue
+			eval, errs := evaluator.EvalString(string(bytes), env)
+			if len(errs) != 0 {
+				for _, err := range errs {
+					fmt.Println(au.Red(err.Error()))
 				}
-			} else if err == io.EOF {
-				break
+				return
 			}
 
-			buffer = buffer + line
-			end := eval(buffer, env)
-			if end {
-				buffer = ""
-				lvl = 0
-			} else {
-				lvl++
-				l.WriteStdin([]byte(
-					strings.Repeat("\t", lvl),
-				))
-				buffer += "\n"
+			if eval.Type() == object.ERROR_OBJ {
+				fmt.Println(aurora.Red("Error running starting file:").Bold())
+				fmt.Println(aurora.Red(eval.Inspect()))
 			}
+
+			fmt.Println("")
 		}
+
+		r := repl.New()
+		r.Env = env
+
+		if shouldLex {
+			r.Mode = "lex"
+		} else if shouldParse {
+			r.Mode = "parse"
+		}
+
+		r.Start()
 	},
-}
-
-func eval(input string, env *object.Environment) (end bool) {
-	l := lexer.New(input)
-	p := parser.New(l)
-
-	program := p.Parse()
-	var hadError bool
-	for _, err := range p.Errors() {
-		e, ok := err.(parser.InvalidTokenError)
-		if !ok {
-			hadError = true
-			continue
-		}
-
-		if e.Unexpected.Type == token.EOF {
-			return false
-		}
-	}
-
-	if hadError {
-		checkErrors(p)
-		return true
-	}
-
-	evaluated := evaluator.Eval(program, env)
-	if evaluated != nil {
-		fmt.Println(
-			au.Green(evaluated.Inspect()),
-		)
-	}
-
-	fmt.Println("")
-	return true
 }
 
 func init() {
@@ -118,4 +99,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// replCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	replCmd.Flags().BoolP("lex", "l", false, "lex the input")
+	replCmd.Flags().BoolP("parse", "p", false, "parse the input")
+
+	replCmd.Flags().StringP("file", "f", "", "eval/lex/parse this file and then start repl")
+
 }

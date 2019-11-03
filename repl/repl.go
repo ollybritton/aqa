@@ -3,9 +3,7 @@ package repl
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
@@ -69,14 +67,14 @@ func (r *Repl) Execute(input string) {
 
 	if strings.HasPrefix(input, "%") {
 		switch input[1:len(input)] {
-		case "lex":
+		case "lex", "tokenize", "split":
 			r.Mode = "lex"
 			fmt.Println(au.Green("Mode set to 'lex'."))
 			fmt.Println("")
 
 			return
 
-		case "parse":
+		case "parse", "ast":
 			r.Mode = "parse"
 			fmt.Println(au.Green("Mode set to 'parse'."))
 			fmt.Println("")
@@ -91,39 +89,26 @@ func (r *Repl) Execute(input string) {
 			return
 
 		case "buf":
-			err := ioutil.WriteFile("/tmp/.aqa-buf.aqa", []byte{}, 0777)
-			if err != nil {
-				fmt.Println(au.Red("Error clearing buffer:").Bold())
-				fmt.Println(au.Red(err))
+			input = Buffer(false)
 
-				return
+			if input != "" {
+				fmt.Println("")
+				fmt.Println(au.Green("Added from buffer:").Bold())
+				fmt.Println(au.Yellow(input))
 			}
 
-			cmd := exec.Command("vim", "/tmp/.aqa-buf.aqa")
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			err = cmd.Run()
+		case "clearbuf":
+			input = Buffer(true)
 
-			if err != nil {
-				fmt.Println(au.Red("Error opening vim buffer:").Bold())
-				fmt.Println(au.Red(err))
-
-				return
+			if input != "" {
+				fmt.Println("")
+				fmt.Println(au.Green("Added from buffer:").Bold())
+				fmt.Println(au.Yellow(input))
 			}
 
-			bytes, err := ioutil.ReadFile("/tmp/.aqa-buf.aqa")
-			if err != nil {
-				fmt.Println(au.Red("Error opening vim buffer:").Bold())
-				fmt.Println(au.Red(err))
-
-				return
-			}
-
-			input = string(bytes)
-
-			fmt.Println("")
-			fmt.Println(au.Green("Added from buffer:").Bold())
-			fmt.Println(au.Yellow(input))
+		case "help":
+			Help()
+			return
 
 		default:
 			message := au.Red(au.Bold(
@@ -226,33 +211,13 @@ func (r *Repl) Eval(input string) {
 
 // Start starts the REPL.
 func (r *Repl) Start() {
-	for {
+	Info()
 
+	for {
 		input := r.Prompt.Input()
 
-		// l := lexer.New(input)
-		// p := parser.New(l)
-
-		// p.Parse()
-		// if len(p.Errors()) != 0 {
-		// 	isEOF := false
-
-		// 	for _, e := range p.Errors() {
-		// 		switch e.(type) {
-		// 		case parser.NoPrefixParseFnError:
-		// 			isEOF = true
-		// 			break
-		// 		}
-		// 	}
-
-		// 	if isEOF {
-		// 		r.Level++
-		// 		continue
-		// 	}
-		// }
-
 		switch {
-		case input == "exit":
+		case input == "exit" || input == "quit", input == "%exit" || input == "%quit":
 			os.Exit(0)
 		case input == "ping":
 			fmt.Println("pong")
@@ -260,6 +225,5 @@ func (r *Repl) Start() {
 		default:
 			r.Execute(input)
 		}
-
 	}
 }

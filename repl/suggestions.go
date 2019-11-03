@@ -19,9 +19,12 @@ var suggestions = []prompt.Suggest{
 	{Text: "true", Description: ""},
 	{Text: "false", Description: ""},
 
+	{Text: "%help", Description: "Print some help text."},
+
 	{Text: "%lex", Description: "Put the REPL into lex mode."},
 	{Text: "%parse", Description: "Put the REPL into parse mode."},
 	{Text: "%eval", Description: "Put the REPL into eval mode."},
 
 	{Text: "exit", Description: "Exit the REPL."},
+	{Text: "quit", Description: "Exit the REPL."},
 }

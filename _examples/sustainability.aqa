@@ -1,0 +1,38 @@
+# Made programming language
+# Three steps
+# - lex (split the text up into its different parts)
+# - parse (take all the 'tokens' and store them in a way the computer can understand)
+#   - use 1 * 2 / 3 - 4 + 5 as example
+# - evaluate (go through all the different parts and work out the individual operations)
+
+SUBROUTINE fuel_economy(distance, engine_size)
+    return distance/engine_size
+ENDSUBROUTINE
+
+car_1_distance <- INPUT("How far does car 1 go on a full tank (in miles)? ")
+car_1_size <- INPUT("How big is car 1's tank (in gallons)? ")
+
+OUTPUT ""
+
+car_2_distance <- INPUT("How far does car 2 go on a full tank (in miles)? ")
+car_2_size <- INPUT("How big is car 2's tank (in gallons)? ")
+
+OUTPUT ""
+
+car_1 <- fuel_economy(car_1_distance, car_1_size)
+car_2 <- fuel_economy(car_2_distance, car_2_size)
+
+PRINT("Car one has", CEIL(car_1), "mpg")
+PRINT("Car two has", CEIL(car_2), "mpg")
+
+OUTPUT ""
+
+IF car_1 > car_2 THEN
+    PRINT("car 1 is more efficient")
+    PRINT("Therefore, you should buy car 1 because it is better for the environment")
+ELSE IF car_1 == car_2 THEN
+    PRINT("car 1 and 2 are equally efficient")
+ELSE
+    PRINT("car 2 is more efficient")
+    PRINT("Therefore, you should buy car 2 because it is better for the environment")
+ENDIF

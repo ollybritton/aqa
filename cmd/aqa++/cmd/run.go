@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 
 	"github.com/ollybritton/aqa/object"
+	"github.com/ollybritton/aqa/repl"
 
 	"github.com/logrusorgru/aurora"
 	au "github.com/logrusorgru/aurora"
@@ -46,7 +47,8 @@ For now, it will also print the result of the evaluation.`,
 		p := parser.New(l)
 
 		program := p.Parse()
-		if checkErrors(p) {
+		if len(p.Errors()) != 0 {
+			repl.Errors(p.Errors())
 			return
 		}
 
