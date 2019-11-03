@@ -213,6 +213,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newSingleToken(token.LBRACE)
 	case '}':
 		tok = l.newSingleToken(token.RBRACE)
+	case '.':
+		tok = l.newSingleToken(token.DOT)
 
 	// Could be single or double
 	case '=': // = or ==

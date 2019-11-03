@@ -1,0 +1,16 @@
+# When importing a package where the subroutines inside access global variables, incorrect behaviour occurs.
+global <- 10
+
+SUBROUTINE increment()
+    global <- global + 1
+ENSUBROUTINE
+
+# Say the following code is run
+#  import "import_global.aqa"
+#  import.global
+#  -> 10
+#  
+#  import.increment()
+#  import.global
+#  -> 10
+#  the above should now be 11.

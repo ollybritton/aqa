@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/ollybritton/aqa/ast"
@@ -70,6 +71,7 @@ func New(l *lexer.Lexer) *Parser {
 		token.RSHIFT: p.parseInfixExpression,
 		token.DIV:    p.parseInfixExpression,
 		token.MOD:    p.parseInfixExpression,
+		token.DOT:    p.parseInfixExpression,
 
 		token.AND: p.parseInfixExpression,
 		token.OR:  p.parseInfixExpression,
@@ -140,6 +142,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseForStatement()
 	case p.curToken.Type == token.REPEAT:
 		return p.parseRepeatStatement()
+	case p.curToken.Type == token.IMPORT:
+		return p.parseImportStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -402,20 +406,24 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 }
 
 func (p *Parser) parseCallExpression(left ast.Expression) ast.Expression {
-	switch t := left.(type) {
-	case *ast.Identifier:
-		return p.parseSubroutineCall(t)
-	default:
-		// TODO: add support for function expressions
-		p.addError(
-			NewInvalidTokenError(left.Token(), p.curToken, left.Token()),
-		)
-		return nil
-	}
+	// some expression ( 1, 2 )
+	//                 ^
+
+	return p.parseSubroutineCall(left)
+	// switch t := left.(type) {
+	// // case *a÷st.Identifier:
+	// default:
+	// TODO: add support for function expressions
+	// log.Printf("Im here: %T", left)
+	// p.addError(
+	// 	NewInvalidTokenError(left.Token(), p.curToken, left.Token()),
+	// )
+	// 	return nil
+	// }
 }
 
-func (p *Parser) parseSubroutineCall(ident *ast.Identifier) ast.Expression {
-	exp := &ast.SubroutineCall{Tok: p.curToken, Subroutine: ident}
+func (p *Parser) parseSubroutineCall(expression ast.Expression) ast.Expression {
+	exp := &ast.SubroutineCall{Tok: p.curToken, Subroutine: expression}
 	exp.Arguments = p.parseCallArguments()
 	return exp
 }
@@ -656,4 +664,40 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 	p.skipNewlines()
 
 	return hash
+}
+
+func (p *Parser) parseImportStatement() *ast.ImportStatement {
+	// import "file.aqa"
+	// import "file.aqa" as otherName
+	// import abc, def from "file.aqa"
+	// import * from "file.aqa"
+
+	// import "dir"
+	// import "dir" as otherName
+
+	stmt := &ast.ImportStatement{Tok: p.curToken}
+	p.nextToken()
+
+	switch p.curToken.Type {
+	case token.STRING:
+		stmt.Path = p.curToken.Literal
+
+		if p.peekTokenIs(token.AS) {
+			p.nextToken()
+		} else {
+			break
+		}
+
+		if !p.expectPeek(token.IDENT) {
+			p.addError(errors.New("missing name after 'as' in import statement"))
+		}
+
+		stmt.As = p.curToken.Literal
+
+	default:
+		p.addError(errors.New("unknown import syntax"))
+		return nil
+	}
+
+	return stmt
 }

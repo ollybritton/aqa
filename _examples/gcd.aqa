@@ -1,13 +1,6 @@
 # The Euclidean Algorithm
 # Calculates the GCD of two numbers
 
-SUBROUTINE mod(a, b)
-    floor <- FLOOR(a / b)
-    result <-  a - (floor * b)
-
-    return result
-ENDSUBROUTINE
-
 SUBROUTINE gcd(a, b)
     IF a == 0 THEN
         return b
@@ -17,7 +10,7 @@ SUBROUTINE gcd(a, b)
         return a
     ENDIF
 
-    return gcd(b, mod(a, b))
+    return gcd(b, a mod b)
 ENDSUBROUTINE
 
 OUTPUT gcd(285, 741)

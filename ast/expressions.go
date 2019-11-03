@@ -125,7 +125,7 @@ func (ie *InfixExpression) String() string {
 // General: `{IDENT}({expression}, {expression}...)`
 type SubroutineCall struct {
 	Tok        token.Token // The '(' token
-	Subroutine *Identifier
+	Subroutine Expression
 	Arguments  []Expression
 }
 
@@ -139,7 +139,7 @@ func (sc *SubroutineCall) String() string {
 		args = append(args, a.String())
 	}
 
-	out.WriteString(sc.Subroutine.Value)
+	out.WriteString(sc.Subroutine.String())
 	out.WriteString("(" + strings.Join(args, ", ") + ")")
 
 	return out.String()
@@ -229,6 +229,26 @@ func (hl *HashLiteral) String() string {
 	out.WriteString("{")
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteString("}")
+
+	return out.String()
+}
+
+// DotExpression is the use of the dot (.) operator on two operator. It gets the member associated object
+// from a module.
+type DotExpression struct {
+	Tok    token.Token // the token.DOT token.
+	Parent Identifier
+	Child  Identifier
+}
+
+func (de *DotExpression) expressionNode()    {}
+func (de *DotExpression) Token() token.Token { return de.Tok }
+func (de *DotExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(de.Parent.Value)
+	out.WriteString(".")
+	out.WriteString(de.Child.Value)
 
 	return out.String()
 }

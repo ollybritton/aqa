@@ -1,0 +1,14 @@
+# Other files can be imported into other files using the import syntax.
+#  import "filename.aqa"
+# All subroutines and variables are now avaliable through filename.funcname()
+
+# If you want the subroutines and variables to be accessed through some other name, you can use 'as':
+#  import "mathematics.aqa" as maths
+
+insideVariable <- "Hello"
+# Access me through imports.insideVariable
+
+SUBROUTINE multiply(a, b)
+    return a*b
+ENDSUBROUTINE
+# Access me through imports.multiply(10, 20)

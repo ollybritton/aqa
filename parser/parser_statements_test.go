@@ -345,6 +345,24 @@ ENDFOR`
 
 }
 
+func TestImportStatement(t *testing.T) {
+	input := `IMPORT "randomPath.aqa"`
+
+	_, program := parseProgram(t, input)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d", 1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ImportStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ImportStatement. got=%T", program.Statements[0])
+	}
+
+	if stmt.Path != "randomPath.aqa" {
+		t.Fatalf("import.Path is not %q. got=%T", "randomPath.aqa", program.Statements[0])
+	}
+}
+
 // private methods to help with statement tests
 func testVariableAssignment(t *testing.T, s ast.Statement, expectedName string) bool {
 	if s.Token().Literal != expectedName {

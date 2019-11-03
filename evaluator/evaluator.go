@@ -88,9 +88,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 	case *ast.SubroutineCall:
-		ident := evalIdentifier(node.Subroutine, env)
-		if isError(ident) {
-			return ident
+		expression := Eval(node.Subroutine, env)
+		if isError(expression) {
+			return expression
 		}
 
 		args := evalExpressions(node.Arguments, env)
@@ -98,7 +98,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return args[0]
 		}
 
-		return applySubroutine(ident, args)
+		return applySubroutine(expression, args)
+
+	case *ast.ImportStatement:
+		err := evalImport(node, env)
+
+		if isError(err) {
+			return err
+		}
 
 	// Literals
 	case *ast.IntegerLiteral:
@@ -128,11 +135,21 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.InfixExpression:
 		left := Eval(node.Left, env)
-		right := Eval(node.Right, env)
-
 		if isError(left) {
 			return left
-		} else if isError(right) {
+		}
+
+		if node.Operator == "." {
+			ident, ok := node.Right.(*ast.Identifier)
+			if !ok {
+				return newError("right-hand side of dot expression is not an identifier, got %T.", node.Right)
+			}
+
+			return evalDotExpression(left, ident.Value)
+		}
+
+		right := Eval(node.Right, env)
+		if isError(right) {
 			return right
 		}
 
@@ -307,17 +324,17 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 
 		return &object.Integer{Value: leftInt.Value << uint64(rightInt.Value)}
 
-	case "DIV":
+	case "DIV", "div":
 		return &object.Integer{Value: int64(
 			math.Floor(float64(leftInt.Value / rightInt.Value)),
 		)}
 
-	case "MOD":
+	case "MOD", "mod":
 		return &object.Integer{Value: int64(
 			leftInt.Value % rightInt.Value,
 		)}
 
-	case "==":
+	case "==", "=":
 		return nativeBoolToBooleanObject(leftInt.Value == rightInt.Value)
 	case "!=":
 		return nativeBoolToBooleanObject(leftInt.Value != rightInt.Value)
@@ -358,7 +375,7 @@ func evalFloatInfixExpression(left object.Object, operator string, right object.
 			math.Floor(lf.Value / rf.Value),
 		)}
 
-	case "==":
+	case "==", "=":
 		return nativeBoolToBooleanObject(lf.Value == rf.Value)
 	case "!=":
 		return nativeBoolToBooleanObject(lf.Value != rf.Value)
@@ -381,9 +398,7 @@ func evalBooleanInfixExpression(left object.Object, operator string, right objec
 	rightVal := right.(*object.Boolean).Value
 
 	switch operator {
-	case "=":
-		return nativeBoolToBooleanObject(leftVal == rightVal)
-	case "==":
+	case "==", "=":
 		return nativeBoolToBooleanObject(leftVal == rightVal)
 	case "!=":
 		return nativeBoolToBooleanObject(leftVal != rightVal)
@@ -650,6 +665,24 @@ func evalHashIndexExpression(hash, index object.Object) object.Object {
 	}
 
 	return pair.Value
+}
+
+func evalDotExpression(parent object.Object, child string) object.Object {
+	module, ok := parent.(*object.Module)
+	if !ok {
+		return newError("cannot use dot operator on %T object", parent)
+	}
+
+	val, exists := module.Env.Get(child)
+	if !exists {
+		return newError("unknown child %q in %s", child, module.Inspect())
+	}
+
+	if !module.Exposed[child] {
+		return newError("unexposed child %q in %s", child, module.Inspect())
+	}
+
+	return val
 }
 
 func applySubroutine(sub object.Object, args []object.Object) object.Object {

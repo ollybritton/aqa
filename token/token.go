@@ -60,6 +60,8 @@ const (
 	EQ     = "=="
 	NOT_EQ = "!="
 
+	DOT = "."
+
 	NOT = "NOT"
 	AND = "AND"
 	OR  = "OR"
@@ -102,7 +104,10 @@ const (
 	MAP  = "MAP"
 
 	// Importing
-	// IMPORT exampleFn, newExample FROM "path"
+	// IMPORT "file" (directly accessible)
+	// IMPORT "folder" (accessible using `folder.functionName`
+	//
+	// The file needs to be run
 	IMPORT = "IMPORT"
 	AS     = "AS"
 	FROM   = "FROM"
@@ -159,6 +164,10 @@ var Keywords = map[string]Type{
 	"and": AND,
 	"or":  OR,
 	"xor": XOR,
+
+	"import": IMPORT,
+	"as":     AS,
+	"from":   FROM,
 
 	"map": MAP,
 }

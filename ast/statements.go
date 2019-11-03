@@ -277,3 +277,23 @@ func (rs *RepeatStatement) String() string {
 
 	return out.String()
 }
+
+// ImportStatement represents an import from another file or folder into the program.
+type ImportStatement struct {
+	Tok token.Token // the token.IMPORT token
+
+	Path string
+	As   string
+	From []string
+}
+
+func (is *ImportStatement) statementNode()     {}
+func (is *ImportStatement) Token() token.Token { return is.Tok }
+func (is *ImportStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("IMPORT ")
+	out.WriteString("\"" + is.Path + "\"")
+
+	return out.String()
+}

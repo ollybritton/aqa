@@ -92,6 +92,7 @@ func eval(input string, env *object.Environment) (end bool) {
 
 	if hadError {
 		checkErrors(p)
+		return true
 	}
 
 	evaluated := evaluator.Eval(program, env)

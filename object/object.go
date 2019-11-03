@@ -21,6 +21,7 @@ const (
 	STRING_OBJ   = "STRING"
 	ARRAY_OBJ    = "ARRAY"
 	HASH_OBJ     = "HASH"
+	MODULE_OBJ   = "MODULE"
 
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	BUILTIN_OBJ      = "BUILTIN"
@@ -151,4 +152,22 @@ func (a *Array) Inspect() string {
 	out.WriteString("]")
 
 	return out.String()
+}
+
+// Module represents a module, which could either be a file or directory.
+type Module struct {
+	Env     *Environment
+	Exposed map[string]bool
+
+	Path      string
+	IsBuiltin bool
+}
+
+func (m *Module) Type() Type { return MODULE_OBJ }
+func (m *Module) Inspect() string {
+	if m.IsBuiltin {
+		return "<module (built-in)>"
+	}
+
+	return fmt.Sprintf("<module %q>", m.Path)
 }
