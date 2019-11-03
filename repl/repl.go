@@ -3,11 +3,16 @@ package repl
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
 	au "github.com/logrusorgru/aurora"
+	"github.com/ollybritton/aqa/evaluator"
 	"github.com/ollybritton/aqa/lexer"
+	"github.com/ollybritton/aqa/object"
 	"github.com/ollybritton/aqa/parser"
 	"github.com/ollybritton/aqa/token"
 )
@@ -17,13 +22,17 @@ type Repl struct {
 	Buffer bytes.Buffer
 	Prompt *prompt.Prompt
 
+	Env *object.Environment
+
 	Mode  string // Either "lex", "parse" or "eval"
 	Level int
+
+	input string
 }
 
 // New returns a new, initialised REPL.
 func New() *Repl {
-	r := &Repl{Mode: "eval"}
+	r := &Repl{Mode: "eval", Env: object.NewEnvironment()}
 	r.Prompt = prompt.New(
 		r.Execute,
 		r.Completor,
@@ -62,17 +71,59 @@ func (r *Repl) Execute(input string) {
 		switch input[1:len(input)] {
 		case "lex":
 			r.Mode = "lex"
-			fmt.Println("")
 			fmt.Println(au.Green("Mode set to 'lex'."))
+			fmt.Println("")
+
+			return
 
 		case "parse":
 			r.Mode = "parse"
-			fmt.Println("")
 			fmt.Println(au.Green("Mode set to 'parse'."))
+			fmt.Println("")
+
+			return
 
 		case "eval", "exec":
 			r.Mode = "eval"
 			fmt.Println(au.Green("Mode set to 'eval'."))
+			fmt.Println("")
+
+			return
+
+		case "buf":
+			err := ioutil.WriteFile("/tmp/.aqa-buf.aqa", []byte{}, 0777)
+			if err != nil {
+				fmt.Println(au.Red("Error clearing buffer:").Bold())
+				fmt.Println(au.Red(err))
+
+				return
+			}
+
+			cmd := exec.Command("vim", "/tmp/.aqa-buf.aqa")
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			err = cmd.Run()
+
+			if err != nil {
+				fmt.Println(au.Red("Error opening vim buffer:").Bold())
+				fmt.Println(au.Red(err))
+
+				return
+			}
+
+			bytes, err := ioutil.ReadFile("/tmp/.aqa-buf.aqa")
+			if err != nil {
+				fmt.Println(au.Red("Error opening vim buffer:").Bold())
+				fmt.Println(au.Red(err))
+
+				return
+			}
+
+			input = string(bytes)
+
+			fmt.Println("")
+			fmt.Println(au.Green("Added from buffer:").Bold())
+			fmt.Println(au.Yellow(input))
 
 		default:
 			message := au.Red(au.Bold(
@@ -81,6 +132,8 @@ func (r *Repl) Execute(input string) {
 
 			fmt.Println(message)
 			fmt.Println("")
+
+			return
 		}
 	}
 
@@ -115,59 +168,98 @@ func (r *Repl) Prefix() (string, bool) {
 }
 
 // Lex lexes a given input string, and displays the results to stdout.
-func (r *Repl) Lex(input string) {}
+func (r *Repl) Lex(input string) {
+	l := lexer.New(input)
+
+	tokens := []token.Token{}
+	tok := l.NextToken()
+
+	for tok.Type != token.EOF {
+		tokens = append(tokens, tok)
+		tok = l.NextToken()
+	}
+
+	fmt.Println("")
+
+	for i, t := range tokens {
+		num := au.Blue(fmt.Sprintf("[%d]", i))
+		fmt.Printf("%v %v\n", num, PrettyToken(t))
+	}
+
+	fmt.Println("")
+}
 
 // Parse parses a given input string, and displays the results to stdout.
-func (r *Repl) Parse(input string) {}
+func (r *Repl) Parse(input string) {
+	l := lexer.New(input)
+	p := parser.New(l)
+
+	program := p.Parse()
+	if len(p.Errors()) != 0 {
+		Errors(p.Errors())
+	}
+
+	fmt.Println(program)
+	fmt.Println("")
+}
 
 // Eval evaluates a given input string, and displays the results to stdout.
-func (r *Repl) Eval(input string) {}
+func (r *Repl) Eval(input string) {
+	obj, errors := evaluator.EvalString(input, r.Env)
+
+	if len(errors) != 0 {
+		Errors(errors)
+	}
+
+	if obj == nil || obj.Type() == object.NULL_OBJ {
+		return
+	}
+
+	if obj.Type() == object.ERROR_OBJ {
+		fmt.Println(au.Red(obj.Inspect()).Bold())
+		return
+	}
+
+	fmt.Println(au.Green(obj.Inspect()))
+	fmt.Println("")
+}
 
 // Start starts the REPL.
 func (r *Repl) Start() {
 	for {
+
 		input := r.Prompt.Input()
 
-		if input == "" {
-			continue
-		}
+		// l := lexer.New(input)
+		// p := parser.New(l)
 
-		if r.Buffer.String() != "" {
-			input = r.Buffer.String() + input
-		}
+		// p.Parse()
+		// if len(p.Errors()) != 0 {
+		// 	isEOF := false
 
-		if r.Mode == "lex" {
+		// 	for _, e := range p.Errors() {
+		// 		switch e.(type) {
+		// 		case parser.NoPrefixParseFnError:
+		// 			isEOF = true
+		// 			break
+		// 		}
+		// 	}
+
+		// 	if isEOF {
+		// 		r.Level++
+		// 		continue
+		// 	}
+		// }
+
+		switch {
+		case input == "exit":
+			os.Exit(0)
+		case input == "ping":
+			fmt.Println("pong")
+			fmt.Println("")
+		default:
 			r.Execute(input)
-			return
 		}
-
-		l := lexer.New(input)
-		p := parser.New(l)
-
-		p.Parse()
-		fatalError := true
-
-		for _, err := range p.Errors() {
-			invalid, ok := err.(parser.InvalidTokenError)
-			if !ok {
-				continue
-			}
-
-			if invalid.Unexpected.Type != token.EOF {
-				continue
-			}
-
-			fatalError = false
-		}
-
-		if fatalError {
-			Errors(p.Errors())
-			r.Level = 0
-			return
-		}
-
-		r.Level++
-		r.Buffer.WriteString(input + "\n")
 
 	}
 }
