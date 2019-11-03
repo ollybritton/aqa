@@ -279,6 +279,15 @@ func evalInfixExpression(left object.Object, operator string, right object.Objec
 	case left.Type() == object.BOOLEAN_OBJ && right.Type() == object.BOOLEAN_OBJ:
 		return evalBooleanInfixExpression(left, operator, right)
 
+	case operator == "=" || operator == "==":
+		if l, ok := left.(object.Hashable); ok {
+			if r, ok := right.(object.Hashable); ok {
+				return nativeBoolToBooleanObject(l.HashKey() == r.HashKey())
+			}
+		}
+
+		fallthrough
+
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 

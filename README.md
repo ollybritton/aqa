@@ -66,7 +66,6 @@ Additions to the spec (hence to `++`)
   # No need to convert to string.
   ```
 
-Also, it **WILL** support the following (to be added)
 * Maps: using the `{` syntax `}`
   ```
   a <- MAP {
@@ -75,6 +74,8 @@ Also, it **WILL** support the following (to be added)
     [1,2]: "foo"
   }
   ```
+
+Also, it **WILL** support the following (to be added)
 
 * `FN`: A function definition that is an expression. Like Python's lambda.
   
@@ -108,3 +109,4 @@ Also, it **WILL** support the following (to be added)
 - [ ] Add support for unicode
 - [ ] Compile the project to [WebAssembly](https://webassembly.org/) so that it can be run in the browser without [https://repl.it](https://repl.it)
 - [ ] Write a wiki/tutorial for the language
+- [ ] The module/import system is still very buggy, such as referencing variables defined in one file when those variables are not imported. Fix this.
