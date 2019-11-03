@@ -1,0 +1,13 @@
+# Filter will apply a function to each item in a list and add it to a new list if that function returns true.
+
+SUBROUTINE filter(fn, arr)
+    arr <- []
+
+    FOR i <- 0 TO LEN(arr)-1
+        IF fn(arr[i]) THEN
+            new <- APPEND(new, arr[i])
+        ENDIF
+    ENDFOR
+
+    return arr
+ENDSUBROUTINE

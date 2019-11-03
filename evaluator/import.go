@@ -13,6 +13,25 @@ import (
 	"github.com/ollybritton/aqa/parser"
 )
 
+func evalWithEnvironment(str string, env *object.Environment) object.Object {
+	l := lexer.New(str)
+	p := parser.New(l)
+
+	program := p.Parse()
+	if len(p.Errors()) > 0 {
+		errors := []string{}
+		for _, e := range p.Errors() {
+			errors = append(errors, e.Error())
+		}
+
+		return newError("could not parse file: %v", strings.Join(errors, "\n"))
+	}
+
+	eval := Eval(program, env)
+
+	return eval
+}
+
 func pathToModuleName(path string) string {
 	// collatz.aqa => collatz
 	// collatz-the-best.aqa => collatz_the_best
@@ -63,29 +82,6 @@ func evalImport(node *ast.ImportStatement, env *object.Environment) object.Objec
 }
 
 func evalFileImport(node *ast.ImportStatement, env *object.Environment) object.Object {
-	bytes, err := ioutil.ReadFile(node.Path)
-	if err != nil {
-		return newError("could not read file %q", node.Path)
-	}
-
-	str := string(bytes)
-
-	l := lexer.New(str)
-	p := parser.New(l)
-
-	program := p.Parse()
-	if len(p.Errors()) > 0 {
-		errors := []string{}
-		for _, e := range p.Errors() {
-			errors = append(errors, e.Error())
-		}
-
-		return newError("could not parse file: %v", strings.Join(errors, "\n"))
-	}
-
-	fileEnv := object.NewEnvironment()
-	eval := Eval(program, fileEnv)
-
 	var moduleName string
 
 	if node.As == "" {
@@ -94,21 +90,57 @@ func evalFileImport(node *ast.ImportStatement, env *object.Environment) object.O
 		moduleName = node.As
 	}
 
+	bytes, err := ioutil.ReadFile(node.Path)
+	if err != nil {
+		return newError("could not read file %q", node.Path)
+	}
+
+	fileEnv := object.NewEnvironment()
+	eval := evalWithEnvironment(string(bytes), fileEnv)
+	exposed := make(map[string]bool)
+
+	switch {
+	case len(node.From) == 0:
+		exposed = fileEnv.Keys()
+	case len(node.From) == 1 && node.From[0] == "*":
+		exposed = fileEnv.Keys()
+	default:
+		for _, val := range node.From {
+			exposed[val] = true
+		}
+
+	}
+
 	module := &object.Module{
 		Env:     fileEnv,
-		Exposed: fileEnv.Keys(),
+		Exposed: exposed,
 
 		Path:      node.Path,
 		IsBuiltin: false,
 	}
 
-	if eval == nil || eval.Type() == "NULL" {
-		env.Set(moduleName, module)
-		return nil
+	if eval != nil && eval.Type() == object.ERROR_OBJ {
+		return newError("error importing file, error during evaluation: %v", eval.Inspect())
 	}
 
-	if eval.Type() == object.ERROR_OBJ {
-		return newError("error importing file, error during evaluation: %v", eval.Inspect())
+	for _, wanted := range node.From {
+		if wanted == "*" {
+			continue
+		}
+
+		_, ok := fileEnv.Get(wanted)
+		if !ok {
+			return newError("no function/variable %q in %s", wanted, module.Inspect())
+		}
+	}
+
+	if eval == nil || eval.Type() == "NULL" {
+		if len(node.From) == 0 {
+			env.Set(moduleName, module)
+		} else {
+			env.AddModule(module)
+		}
+		return nil
 	}
 
 	return nil

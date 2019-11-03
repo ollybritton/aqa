@@ -9,15 +9,14 @@ type Environment struct {
 	store     map[string]Object
 	constants map[string]Object
 	outer     *Environment
-	imported  map[string]*Environment
+	modules   []*Module
 }
 
 // NewEnvironment creates a new environment.
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)
 	c := make(map[string]Object)
-	i := make(map[string]*Environment)
-	return &Environment{store: s, constants: c, imported: i, outer: nil}
+	return &Environment{store: s, constants: c, modules: []*Module{}, outer: nil}
 }
 
 // NewEnclosedEnvironment creates a new enclosed environment, extending from a previous.
@@ -30,16 +29,32 @@ func NewEnclosedEnvironment(outer *Environment) *Environment {
 
 // Get gets an object by name.
 func (e *Environment) Get(name string) (Object, bool) {
-
 	obj, ok := e.store[name]
-	if !ok {
-		obj, ok = e.constants[name]
-		if !ok && e.outer != nil {
-			obj, ok = e.outer.Get(name)
+	if ok {
+		// In normal store
+		return obj, ok
+	}
+
+	obj, ok = e.constants[name]
+	if ok {
+		// In constant store
+		return obj, ok
+	}
+
+	if e.outer != nil {
+		// Inside outer environment
+		obj, ok = e.outer.Get(name)
+	}
+
+	for _, module := range e.modules {
+		obj, ok = module.Env.Get(name)
+		if ok && module.IsExposed(name) {
+			return obj, ok
 		}
 	}
 
-	return obj, ok
+	// return obj, ok
+	return nil, false
 }
 
 // Set sets an object by name.
@@ -78,13 +93,7 @@ func (e *Environment) SetConstant(name string, value Object) Object {
 	return value
 }
 
-// AddEnvironment adds the objects from one environment into another.
-func (e *Environment) AddEnvironment(env *Environment) {
-	for ident, value := range env.store {
-		e.store[ident] = value
-	}
-
-	for ident, value := range env.constants {
-		e.constants[ident] = value
-	}
+// AddModule adds the objects from one module into another.
+func (e *Environment) AddModule(module *Module) {
+	e.modules = append(e.modules, module)
 }

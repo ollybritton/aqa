@@ -102,27 +102,12 @@ type Subroutine struct {
 
 func (s *Subroutine) Type() Type { return FUNCTION_OBJ }
 func (s *Subroutine) Inspect() string {
-	var out bytes.Buffer
-
-	params := []string{}
-	for _, p := range s.Parameters {
-		params = append(params, p.String())
+	args := []string{}
+	for _, arg := range s.Parameters {
+		args = append(args, arg.String())
 	}
 
-	out.WriteString("SUBROUTINE\n")
-	out.WriteString(s.Name.String())
-	out.WriteString("(")
-	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(")\n")
-
-	for _, stmt := range s.Body.Statements {
-		out.WriteString("  " + stmt.String())
-	}
-	out.WriteString("\n")
-
-	out.WriteString("ENDSUBROUTINE")
-
-	return out.String()
+	return fmt.Sprintf("<subroutine %s(%s)>", s.Name, strings.Join(args, ", "))
 }
 
 // String represents a string within the evaluator.
@@ -170,4 +155,8 @@ func (m *Module) Inspect() string {
 	}
 
 	return fmt.Sprintf("<module %q>", m.Path)
+}
+
+func (m *Module) IsExposed(name string) bool {
+	return m.Exposed[name]
 }

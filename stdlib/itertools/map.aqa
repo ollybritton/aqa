@@ -1,0 +1,11 @@
+# Map deals with mapping a function/subroutine to a list.
+
+SUBROUTINE mapfn(fn, arr)
+    new <- []
+
+    FOR i <- 0 TO LEN(arr)-1
+        new <- APPEND(new, fn(arr[i]))
+    ENDFOR
+
+    return new
+ENDSUBROUTINE

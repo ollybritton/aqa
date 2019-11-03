@@ -17,18 +17,30 @@ import (
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run [filename]",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Short: "run runs a .aqa file and displays the output",
 	Long: `run will run a file containing AQA++ source code.
 For now, it will also print the result of the evaluation.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		bytes, err := ioutil.ReadFile(args[0])
+		command, err := cmd.Flags().GetString("command")
 		if err != nil {
-			fmt.Println(au.Bold(au.Red("Could not read file:")))
+			fmt.Println(au.Bold(au.Red("Could not fetch flag:")))
 			fmt.Println(au.Red(err))
 		}
 
-		str := string(bytes)
+		var str string
+
+		if command != "" {
+			str = command
+		} else {
+			bytes, err := ioutil.ReadFile(args[0])
+			if err != nil {
+				fmt.Println(au.Bold(au.Red("Could not read file:")))
+				fmt.Println(au.Red(err))
+			}
+
+			str = string(bytes)
+		}
 
 		l := lexer.New(str)
 		p := parser.New(l)
@@ -60,5 +72,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	runCmd.Flags().StringP("command", "c", "", "Command to run before exiting")
 }

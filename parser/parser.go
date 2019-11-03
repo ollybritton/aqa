@@ -694,6 +694,30 @@ func (p *Parser) parseImportStatement() *ast.ImportStatement {
 
 		stmt.As = p.curToken.Literal
 
+	case token.IDENT, token.ASTERISK:
+		from := []string{p.curToken.Literal}
+		p.nextToken()
+
+		for p.curTokenIs(token.COMMA) {
+			p.nextToken()
+
+			if p.curTokenIs(token.IDENT) || p.curTokenIs(token.ASTERISK) {
+				from = append(from, p.curToken.Literal)
+				p.nextToken()
+			} else {
+				p.addError(errors.New("unknown import syntax"))
+				return nil
+			}
+		}
+
+		if !p.expectPeek(token.STRING) {
+			p.addError(errors.New("unknown import syntax"))
+			return nil
+		}
+
+		stmt.Path = p.curToken.Literal
+		stmt.From = from
+
 	default:
 		p.addError(errors.New("unknown import syntax"))
 		return nil

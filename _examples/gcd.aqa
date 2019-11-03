@@ -2,6 +2,7 @@
 # Calculates the GCD of two numbers
 
 SUBROUTINE gcd(a, b)
+    OUTPUT "gcd"
     IF a == 0 THEN
         return b
     ENDIF
@@ -13,4 +14,15 @@ SUBROUTINE gcd(a, b)
     return gcd(b, a mod b)
 ENDSUBROUTINE
 
-OUTPUT gcd(285, 741)
+SUBROUTINE gcd2(a, b)
+    OUTPUT "gcd2"
+    IF a == 0 THEN
+        return b
+    ENDIF
+
+    IF b == 0 THEN
+        return a
+    ENDIF
+
+    return gcd2(b, a mod b)
+ENDSUBROUTINE
