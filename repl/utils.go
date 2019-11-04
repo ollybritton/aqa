@@ -1,6 +1,7 @@
 package repl
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -21,10 +22,19 @@ func Buffer(clear bool) string {
 		}
 	}
 
+	// Clear swap file, fail silently if it doesn't exist
+	err := os.Remove("/tmp/.aqa-buf.aqa.swp")
+	if !errors.Is(err, os.ErrExist) && !errors.Is(err, os.ErrNotExist) {
+		fmt.Println(au.Red("Error clearing swapfile buffer:").Bold())
+		fmt.Println(au.Red(err))
+
+		return ""
+	}
+
 	cmd := exec.Command("vim", "/tmp/.aqa-buf.aqa")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
-	err := cmd.Run()
+	err = cmd.Run()
 
 	if err != nil {
 		fmt.Println(au.Red("Error opening vim buffer:").Bold())

@@ -44,6 +44,9 @@ func (e *Environment) Get(name string) (Object, bool) {
 	if e.outer != nil {
 		// Inside outer environment
 		obj, ok = e.outer.Get(name)
+		if ok {
+			return obj, ok
+		}
 	}
 
 	for _, module := range e.modules {

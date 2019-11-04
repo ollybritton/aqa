@@ -101,7 +101,11 @@ func (p *Parser) addError(err error) {
 func (p *Parser) Parse() *ast.Program {
 	program := &ast.Program{}
 
-	for p.curToken.Type != token.EOF {
+	for {
+		if p.curTokenIs(token.EOF) {
+			break
+		}
+
 		stmt := p.parseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
@@ -114,15 +118,17 @@ func (p *Parser) Parse() *ast.Program {
 }
 
 func (p *Parser) nextToken() {
-
 	p.curToken = p.peekToken
-
 	p.peekToken = p.l.NextToken()
 }
 
 func (p *Parser) parseStatement() ast.Statement {
 	for p.curTokenIs(token.NEWLINE) {
 		p.nextToken()
+	}
+
+	if p.curTokenIs(token.EOF) {
+		return nil
 	}
 
 	switch {

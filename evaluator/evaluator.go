@@ -535,8 +535,6 @@ func evalWhileStatement(node *ast.WhileStatement, env *object.Environment) objec
 }
 
 func evalForStatement(node *ast.ForStatement, env *object.Environment) object.Object {
-	extended := object.NewEnclosedEnvironment(env)
-
 	lower, ok := Eval(node.Lower, env).(*object.Integer)
 	if !ok {
 		return newError("expected integer expression for `for` loop lower bound, got=%T", node.Lower)
@@ -554,12 +552,12 @@ func evalForStatement(node *ast.ForStatement, env *object.Environment) object.Ob
 			return newError("cannot assign to builtin: %s", node.Ident.Value)
 		}
 
-		err := extended.Set(node.Ident.Value, &object.Integer{Value: i})
+		err := env.Set(node.Ident.Value, &object.Integer{Value: i})
 		if isError(err) {
 			return err
 		}
 
-		val = Eval(node.Body, extended)
+		val = Eval(node.Body, env)
 
 		if isError(val) {
 			return val
