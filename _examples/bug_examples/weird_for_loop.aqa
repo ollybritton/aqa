@@ -1,0 +1,19 @@
+userlist <- ["u1", "u2", "u3"]
+passlist <- ["pass1", "pass2", "pass3"]
+
+REPEAT
+    username <- INPUT("Username: ")
+    password <- INPUT("Password: ")
+
+    validLogin <- false
+
+    FOR usernum <- 0 TO 2 THEN
+        IF (userlist[usernum] = username)
+           AND (passlist[usernum] = passlist)
+        THEN
+            validLogin <- true
+        ENDIF
+    ENDFOR
+UNTIL validLogin = true
+
+OUTPUT "Login successful"

@@ -360,7 +360,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 	leftExp := prefix()
 
-	for !(p.peekTokenIs(token.NEWLINE) || p.peekTokenIs(token.EOF)) && precedence < p.peekPrecedence() {
+	for !(p.peekTokenIs(token.EOF)) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
 		if infix == nil {
 			return leftExp
